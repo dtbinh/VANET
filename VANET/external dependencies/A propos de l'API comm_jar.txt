@@ -1,0 +1,4 @@
+Il faut placer ces fichiers dans:
+1-J'ai placer le fichier win32com.dll dans Java\jre6\bin.
+2-J'ai placer le fichier comm.jar dans Java\jre6\lib\ext et Java\jre6\lib.
+3-j'ai placer le fichier javax.comm.properties dans Java\jre6\lib. 

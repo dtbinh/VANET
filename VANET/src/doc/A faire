@@ -1,0 +1,8 @@
+otimiser le code de dispatchFrame avec liste des voisins
+  -> separer embedded et non embedded
+
+Vérifier quand est appelé updatePhysicalNeighborList
+
+Optimiser le dessin des connexions (2x les memes)
+
+Revoir le traitement pixel/pixel

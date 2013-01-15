@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry excluding="javacomm20-win32/commapi/samples/ParallelBlackBox/|javacomm20-win32/commapi/samples/BlackBox/|javacomm20-win32/commapi/samples/Simple/|javacomm20-win32/commapi/|javacomm20-win32/commapi/samples/SerialDemo/" kind="src" path=""/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="comm.jar"/>
+	<classpathentry kind="output" path="javacomm20-win32/commapi/samples/SerialDemo"/>
+</classpath>

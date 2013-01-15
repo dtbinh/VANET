@@ -1,0 +1,169 @@
+% Documentation du style Latex pour les articles de revues ou de conférences Hermes
+% Les consignes aux auteurs sont en annexe de ce document.
+
+\documentclass[fleqn,pdflatex]{article-hermes}
+%\documentclass[a4paper,twoside]{article}
+%\documentclass[times, 10pt,twocolumn]{article}
+%\usepackage{latex8}
+%\usepackage{ieeefig}
+\usepackage{graphicx}
+\usepackage{amssymb}
+%\usepackage[french]{babel}
+%\usepackage[latin1]{inputenc}
+%\usepackage[T1]{fontenc}
+\usepackage{pifont}
+\usepackage{times}
+
+%%% Commandes spécifiques à l'article
+\newcommand{\cfsect}[1]{(\textit{cf.} section~\ref{#1})}
+\newcommand{\cfsectpage}[1]{(\textit{cf.} section~\ref{#1}, page~\pageref{#1})}
+\providecommand{\figureref}[1]{\figname~\ref{#1}}
+\providecommand{\cftab}[1]{(\textit{cf.} tableau~\ref{#1})}
+\newcommand{\cmd}[1]{{\upshape\texttt{\symbol{"5C}#1}}}
+
+\begin{document}
+
+% Format des entêtes : 3 possibilités
+%
+% \submitted[date]{Nom de la revue}{n° de soumission}
+% exemple : \submitted[13/12/04]{RSTI - RIA}{1}
+%
+% \proceedings{Nom de la conférence + lieu + date}{n° 1ère page}
+%
+% \journal{Nom de la revue. Volume ?? -- n° ??/????}{n° 1ère page}{n° dernière page}
+% exemple : \journal{RSTI - RIA. Volume 19 -- n° 1/2005}{55}{88}
+\submitted[02/06/2011]{Tutorial}{1.00}
+
+\title[MASH Simulator]
+      {Création d'une solution}
+
+
+%\subtitle{Alliance d'une analyse multi-agents et d'une conception orientée composants}
+
+%\title[La méthode DIAMOND]
+%      {La méthode DIAMOND pour le développement de systèmes embarqués coopérants}
+%\subtitle{Alliance d'une analyse multi-agents et d'une conception orientée composants}
+
+\author{Jean-Paul Jamont}
+
+\address{Université de Grenoble II\\
+Laboratoire LCIS - INPG
+50 rue Barthélemy de Laffemas\\
+26902 VALENCE Cedex, 26902, FRANCE\\
+jean-paul.jamont@iut-valence.fr}
+
+\resume{Ce tutorial traite de la création sous MASH de solutions multi-agents, d'événements, de critères de mesures et de scénarios.}
+
+
+\abstract{This article explain how we can create multiagent solutions, events, measure criteria and scenarios.}
+
+\motscles{MASH}
+
+\keywords{MASH}
+
+\maketitlepage
+
+{\footnotesize\tableofcontents\newpage}
+
+
+\section{Le simulateur MASH}
+
+
+
+\section{Cas d'étude : les agents horloges}
+
+Le cas d'étude du tutoriel sera une application mêlant deux types d'agents. Des agents horloges (\texttt{Horloge}) et des agents utilisateurs (\texttt{Utilisateur}).
+
+Les agents \texttt{Horloge} diffusent toutes les 10 secondes l'heure à tous les agents qui sont dans leur portée d'émission. Ces agents peuvent tout de même répondre à des requêtes venant des utilisateurs. Elles peuvent décliner leur identité et l'heure (ces deux messages ne sont pas destinés à tous les agents voisins mais uniquement à destination de l'initiateur de la requête).
+
+Les agents \texttt{Utilisateur} remercient les horloges lorsqu'elles indiquent l'heure en déclinant leur identité. Il émettent une requête toutes les 25secondes  soit pour demander l'heure aux horloges voisines (probabilité de $\frac{4}{5}$) soit pour connaître l'identité des horloges voisines et ne demander l'heure qu'à l'une d'entre elles (probabilité de $\frac{1}{5}$). 
+
+\section{Création d'une solution}
+
+Pour créer une solution il est nécessaire de créer dans le package \texttt{Simulation.Solution.Custom} une classe héritant de la classe \texttt{Simulation.Solution.SolutionItem}.
+
+Nous allons créer la classe \texttt{HorlogeSolution}. Il est a remarquer que :
+\begin{itemize}
+\item seul l'instance de la classe \texttt{Simulation.Solutions.Solution} passé en paramètre de la méthode \texttt{setSolution} change d'une solution à une autre.
+\item il est nécessaire de donner une référence vers les classes des objets et agents que peut contenir le système multi-agents. 
+\end{itemize}
+
+Dans la solution proposée, nous supposerons que les comportements des agents (\texttt{Horloge}) et des agents (\texttt{Utilisateur}) seront codés dans une même classe (la classe \texttt{Simulation.Solutions.Custom.AgentHorloge.AgentHorlogeUtilisateur}).
+
+\begin{verbatim}
+package Simulation.Solutions.Custom;
+
+import Simulation.Solutions.Solution;
+import Simulation.Solutions.SolutionDescriber;
+import Simulation.Solutions.SolutionDescriberException;
+import Simulation.Solutions.SolutionException;
+import Simulation.Solutions.Custom.AgentHorloge.AgentHorlogeUtilisateur;
+
+/**
+ * Horloge solution
+ * @author Jean-Paul Jamont
+ */
+public class HorlogeSolution extends SolutionItem
+{
+	public HorlogeSolution()
+	{
+		super();
+
+		try
+		{
+			super.setSolution(
+					new Solution(
+							new SolutionDescriber(
+									"Jean-Paul Jamont" 					/* nom de l'auteurs de la solution */,
+									"jean-paul.jamont@iut-valence.fr" 	/* adresse mail du correspondant*/,
+									"Universite Pierre Mendes France" 	/* établissement de rattachement*/,
+									"51 rue barthelemy de Laffemas, 26000 Valence" /* adresse */,
+									"France" 							/* pays */,
+									"HORLOGE - Agent Horloge" 			/* Dénomination */,
+									"1a" 								/* version */,
+									"Implementation of a user/clock toy problem" /*Description */
+							), 
+							new AgentHorlogeUtilisateur(null,0,1f,0).getClass() /* référence vers l'agent */
+					)
+			);
+		} 
+		catch(SolutionException e)
+		{
+			e.printStackTrace();
+		}
+		catch(SolutionDescriberException e)
+		{
+			e.printStackTrace();
+		}
+	}
+}
+
+\end{verbatim}
+
+\section{Création des agents et objets}
+
+D'une manière générale, il suffit de créer 
+
+\section{Création d'événements}
+
+Bla bla bla...
+
+\section{Création de critères de mesures}
+
+Bla bla bla...
+
+\section{Création de scénarios}
+
+Bla bla bla...
+
+\section{Analyse des résultats de simulation}
+
+Bla bla bla...
+
+\bibliography{exemple-biblio}
+
+\end{document}
+
+
+%\nocite{*}
+
