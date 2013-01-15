@@ -6,6 +6,7 @@ import simulation.multiagentSystem.MAS;
 import simulation.views.entity.imageInputBased.ImageFileBasedObjectView;
 
 import java.awt.Color;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -19,6 +20,8 @@ import java.util.List;
 public class Voiture extends Agent implements ObjectAbleToSendMessageInterface 
 {	
 	//Référencement des ressources	
+	@SuppressWarnings("unused")
+	
 	private final static String CHEMIN_ACCES_MATRICE ="C:\\Users\\Wyvern\\Dropbox\\Projet VANET\\Code MASH\\Ressources de test";
 	
 	private final static String SPRITE_FILENAME_RIGHT = "\\VANET.Ressources\\Sprites\\carViewRight.bmp";//FIXME
@@ -49,18 +52,27 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 		this.setPosition(x, y);
 		this.setColor(c);
 		
+		//Création de la vue par défaut de la voiture avec estion des erreurs
+		try {
+			view = new ImageFileBasedObjectView(SPRITE_FILENAME_LEFT);
+		} catch (IOException InvalidInputFile) {
+			// TODO Auto-generated catch block
+			InvalidInputFile.printStackTrace();
+		}
+		
 		// l'endroit de départ ne figure pas dans le chemin à suivre (mais la voiture doit démarrer à coté de B !)
 		this.cheminASuivre.add(this.map.getCroisement("B"));
 		this.cheminASuivre.add(this.map.getCroisement("E"));
-		this.cheminASuivre.add(this.map.getCroisement("H"));
-		this.cheminASuivre.add(this.map.getCroisement("I"));
+		//Pour plus tard 
+		/*this.cheminASuivre.add(this.map.getCroisement("H"));
+		this.cheminASuivre.add(this.map.getCroisement("I"));*/
 	}
 
 	
 	public void run()
 	{
 		// wait a little amount of time to allow the construction of others agents 
-		try{Thread.sleep(500);}catch(Exception e){}
+		try{Thread.sleep(500);}catch(Exception InvalidThreadException){}
 		
 		while(!isKilling() && !isStopping())
 		{
@@ -73,7 +85,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 			}
 			
 			//puis faire le dernier mouvement ?
-			
+			//this.isKilling();
 		}		
 	}
 
@@ -93,8 +105,8 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 			// tant qu'on n'a pas atteint le prochain croisement
 			try {
 				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+			} catch (InterruptedException InvalidThreadException) {
+				InvalidThreadException.printStackTrace();
 			}
 			int deltaX = 0, deltaY = 0;
 			if (this.getPosition().x < dest.getPos().x)
