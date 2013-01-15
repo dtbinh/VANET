@@ -34,13 +34,17 @@ public class Map {
 			 */
 			if (scanner.hasNextLine())
 			{
+				//Lecture du premier int correspondant au nombre de croisement
 				int nbCroisements = scanner.nextInt();
+				
 				for (int i = 1 ; i <= nbCroisements ; i++)
 				{
 					//recuperer croisement courant
 					Croisement croisCourant = new Croisement(scanner.nextInt(), scanner.nextInt(), scanner.nextLine());
 					//l'ajouter à la liste
-					if (croisCourant != null){//FIXME inutile, logiquement
+					if (croisCourant != null)
+					{
+						//FIXME inutile, logiquement
 						System.out.println("i=" + i + ", Croisement courant =" + croisCourant.toString());
 						this.croisements.add(croisCourant);
 					}
@@ -54,14 +58,12 @@ public class Map {
 					scanner.nextLine();
 					Iterator<Croisement> i = this.croisements.iterator();
 					Croisement deb = null, fin = null, croisCourant = null;
-		System.out.println("bou");
+			System.out.println("bou");
 					while (deb == null || fin == null)
-					{// On est sur de trouver les croisements qui correspondent (si le fichier est bien fait)
-						
+					{// On est sur de trouver les croisements qui correspondent (si le fichier est bien fait)						
 			t++;
 			System.out.println("t = "+t);
-						croisCourant = i.next();
-						
+						croisCourant = i.next();						
 						if (croisCourant.getName().equals(d))
 							deb = croisCourant;
 						if (croisCourant.getName().equals(f))
@@ -78,10 +80,7 @@ public class Map {
 			System.out.println("Fichier Matrice introuvable");
 			e.printStackTrace();
 		}
-		 
-		
-		 
-		scanner.close();
+		 scanner.close();
 	}
 	/**
 	 * @param name le nom du Croisement recherché

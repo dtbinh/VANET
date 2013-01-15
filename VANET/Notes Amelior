@@ -1,0 +1,6 @@
+Notes Amélioration MASH: 
+
+-- Wyvern --
+	-- Lors de l'ajout d'une nouveau projet sous mash la fenetre affiche deux fois "X=" au lieu de "X=" & "Y=" 
+	pour saisir les dimenions de l'environnement
+--ccolombert--

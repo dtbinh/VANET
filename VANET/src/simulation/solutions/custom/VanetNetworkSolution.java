@@ -1,4 +1,4 @@
-package simulation.solutions.custom.VANETNetwork;
+package simulation.solutions.custom;
 
 import java.util.Vector;
 
@@ -6,11 +6,10 @@ import simulation.solutions.Solution;
 import simulation.solutions.SolutionDescriber;
 import simulation.solutions.SolutionDescriberException;
 import simulation.solutions.SolutionException;
-import simulation.solutions.custom.SolutionItem;
 
-public class VanetSolution extends SolutionItem{
+public class VanetNetworkSolution extends SolutionItem{
 
-	public VanetSolution(){
+	public VanetNetworkSolution(){
 		super();
 		try{
 			Vector<Class> agents = new Vector<Class>();
@@ -19,11 +18,11 @@ public class VanetSolution extends SolutionItem{
 			super.setSolution(
 					new Solution(
 							new SolutionDescriber(
-									"Charles Collombert",
-									"charles.collombert@hotmail.com	",
+									"Charles Collombert && Vincent Guilleminot",
+									"charles.collombert@hotmail.com	&& guilleminotvincent@gmail.com",
 									"IUT de Valence",
 									"Valence",
-									"Valence",
+									"26000",
 									"Projet Vanet",
 									"1",
 									"Vanet model"),

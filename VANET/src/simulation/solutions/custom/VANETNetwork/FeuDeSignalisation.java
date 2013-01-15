@@ -18,9 +18,9 @@ import simulation.views.entity.imageInputBased.ImageFileBasedObjectView;
  * @author Wyvern
  *
  */
-public  class FeuDeSignalisation extends Agent implements ObjectAbleToSendMessageInterface{
+//public  class FeuDeSignalisation extends Agent implements ObjectAbleToSendMessageInterface{
 	
-	private final static nativeEntityView AFFICHE_DEFAULT= basic;
+/**	private final static nativeEntityView AFFICHE_DEFAULT= basic;
 	public FeuDeSignalisation(int x, int y)
 	{
 		//TODO Faire le constructue r de FeuDeSignalisation
@@ -38,4 +38,4 @@ public  class FeuDeSignalisation extends Agent implements ObjectAbleToSendMessag
 		
 	}
 	
-}
+}*/
