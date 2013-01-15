@@ -18,7 +18,7 @@ public class VanetNetworkSolution extends SolutionItem{
 			super.setSolution(
 					new Solution(
 							new SolutionDescriber(
-									"Charles Collombert && Vincent Guilleminot",
+									"Charles Collombert && Vincent Guilleminot(REYKJANES,WYVERN)",
 									"charles.collombert@hotmail.com	&& guilleminotvincent@gmail.com",
 									"IUT de Valence",
 									"Valence",
