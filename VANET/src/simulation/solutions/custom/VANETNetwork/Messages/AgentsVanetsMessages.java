@@ -1,6 +1,5 @@
 package simulation.solutions.custom.VANETNetwork.Messages;
 
-
 import simulation.utils.IntegerPosition;
 /**
  * Classe définissant les frames utilisée lors de la communications entre agents
@@ -45,4 +44,5 @@ public class AgentsVanetsMessages {
 	public void setPositionAgent(IntegerPosition positionAgent) {
 		this.positionAgent = positionAgent;
 	}
+	
 }
