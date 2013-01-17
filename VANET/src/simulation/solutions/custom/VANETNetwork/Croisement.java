@@ -16,18 +16,18 @@ public class Croisement extends Agent implements ObjectAbleToSendMessageInterfac
 		super(mas, id, range);
 		this.name = name;
 		this.feu = new FeuDeSignalisation(Croisement.map.listCroisAdjacents(this.name));
-	}
-	
+	}	
 	 
 	public String getName(){
 		return this.name;
 	}
+	
 	/**
 	 * Redéfinition de toString
 	 */
-	public String toString(){
+	/**public String toString(){
 		return this.name + " ("+this.pos.x + "," + this.pos.y + ")";
-	}
+	}*/
 
 	@Override
 	public void sendMessage(int receiver, String message) {

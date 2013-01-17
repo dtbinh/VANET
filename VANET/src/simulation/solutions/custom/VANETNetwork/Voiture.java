@@ -3,23 +3,10 @@ package simulation.solutions.custom.VANETNetwork;
 import simulation.entities.Agent;
 import simulation.messages.ObjectAbleToSendMessageInterface;
 import simulation.multiagentSystem.MAS;
+import simulation.utils.IntegerPosition;
 import simulation.views.entity.imageInputBased.ImageFileBasedObjectView;
-
-import java.awt.Color;
-import java.io.CharArrayReader;
-import java.io.FileReader;
-import java.io.Reader;
-import java.io.BufferedReader;
-
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.StringTokenizer;
 
-import javax.print.DocFlavor.READER;
 
 
 /**
@@ -30,8 +17,8 @@ import javax.print.DocFlavor.READER;
 public class Voiture extends Agent implements ObjectAbleToSendMessageInterface 
 {	
 	//Référencement des ressources	
-	private final static String CHEMIN_ACCES_MATRICE ="C:\\car.png";
-	private final static String SPRITE_FILENAME = "Chemin disque à remplir";//FIXME
+	private final static String SPRITE_FILENAME ="C:\\croisement.png";
+	//private final static String SPRITE_FILENAME = "Chemin disque à remplir";//FIXME
 	private ImageFileBasedObjectView view;
 	
 	
@@ -46,20 +33,15 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	/**
 	 * TODO cf doc de cheminASuivre : plus tard, les voitures n'auront pas accès à la map complète
 	 */
-	private static Map map = new Map();
+	//private static Map map = new Map();
 	
-	public Voiture(MAS mas, Integer id, Float energy,Integer range, int x, int y, Color c)
+	public Voiture(MAS mas, Integer id, Float energy,Integer range)
 	{	
-		super(mas, id, range);
-		this.setPosition(x, y);
-		this.setColor(c);
-		
-		// l'endroit de départ ne figure pas dans le chemin à suivre (mais la voiture doit démarrer à coté de B !)
-		this.cheminASuivre.add(this.map.getCroisement("B"));
-		this.cheminASuivre.add(this.map.getCroisement("E"));
-		this.cheminASuivre.add(this.map.getCroisement("H"));
-		this.cheminASuivre.add(this.map.getCroisement("I"));
-	}
+		super(mas, id, range);		
+		try{ view = new ImageFileBasedObjectView(SPRITE_FILENAME);}
+		catch(Exception e){}		
+	}	
+	
  
 	
 	public void run()
@@ -68,38 +50,44 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 		try{Thread.sleep(500);}catch(Exception e){}
 		
 		while(!isKilling() && !isStopping())
-		{
-			Iterator<Croisement>iteratorCheminASuivre = this.cheminASuivre.iterator();
-			Croisement prochaineDestination = iteratorCheminASuivre.next();
-			
-			
-		//	while(iteratorCheminASuivre.hasNext()){
-			
-				//aller jusqu'à la prochaine destination
-				while (! this.getPosition().equals(prochaineDestination.getPosition()))
-				{// tant qu'on n'a pas atteint le prochain croisement
-					try {
-						Thread.sleep(100);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					int deltaX = 0, deltaY = 0;
-					if (this.getPosition().x < prochaineDestination.getPosition().x)
-						deltaX = 1;
-					else if (this.getPosition().x > prochaineDestination.getPosition().x)
-						deltaX = -1;
-					if (this.getPosition().y < prochaineDestination.getPosition().y)
-						deltaY = 1;
-					else if (this.getPosition().y > prochaineDestination.getPosition().y)
-						deltaY = -1;
-					
-					this.setPosition(this.getPosition().x + deltaX, this.getPosition().y + deltaY);
-				}
-			//}
-			//puis faire le dernier mouvement ?
-			
+		{				
+			this.allerA(600,600);
+			this.isKilling();		
 		}
+				
 		
+	}
+	
+	public void aaa()
+	{
+		System.out.println("aaaa");
+	}
+	public void aaa(int i)
+	{
+		System.out.println("aaaa"+i+"---");
+	}
+	
+	public void allerA(int x, int y)
+	{
+		while (! this.getPosition().equals(new IntegerPosition(x,y)))
+		{// tant qu'on n'a pas atteint le prochain croisement
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			int deltaX = 0, deltaY = 0;
+			if (this.getPosition().x < x)
+				deltaX = 1;
+			else if (this.getPosition().x > x)
+				deltaX = -1;
+			if (this.getPosition().y < y)
+				deltaY = 1;
+			else if (this.getPosition().y >y)
+				deltaY = -1;
+			
+			this.setPosition(this.getPosition().x + deltaX, this.getPosition().y + deltaY);
+		}
 	}
 
 	@Override

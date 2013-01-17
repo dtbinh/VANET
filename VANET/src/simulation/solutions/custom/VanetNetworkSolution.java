@@ -14,13 +14,13 @@ public class VanetNetworkSolution extends SolutionItem{
 		try{
 			Vector<Class> agents = new Vector<Class>();
 			agents.add(Class.forName("simulation.solutions.custom.VANETNetwork.Voiture"));
-			agents.add(Class.forName("simulation.solutions.custom.VANETNetwork.Croisement"));
+			//agents.add(Class.forName("simulation.solutions.custom.VANETNetwork.Croisement"));
 			//agents.add(Class.forName("simulation.solutions.custom.VANETNetwork.FeuDeSignalisation"));
 
 			super.setSolution(
 					new Solution(
 							new SolutionDescriber(
-									"Charles Collombert && Vincent Guilleminot(REYKJANES,WYVERN)",
+									"Charles Collombert && Vincent Guilleminot(ccollombert/Reykjanes)",
 									"charles.collombert@hotmail.com	&& guilleminotvincent@gmail.com",
 									"IUT de Valence",
 									"Valence",

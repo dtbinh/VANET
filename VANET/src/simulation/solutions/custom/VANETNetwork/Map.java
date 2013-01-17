@@ -39,10 +39,10 @@ public class Map {
 				for (int i = 1 ; i <= nbCroisements ; i++)
 				{ 
 					//recuperer croisement courant
-					Croisement croisCourant = new Croisement(scanner.nextInt(), scanner.nextInt(), scanner.nextLine().substring(1));
+					//Croisement croisCourant = new Croisement(scanner.nextInt(), scanner.nextInt(), scanner.nextLine().substring(1));
 					//l'ajouter à la liste
-					if (croisCourant != null)//FIXME inutile, logiquement ?
-						this.croisements.add(croisCourant);
+					//if (croisCourant != null)//FIXME inutile, logiquement ?
+				//		this.croisements.add(croisCourant);
 				}
 				//lecture des arcs
 				while (scanner.hasNext())
