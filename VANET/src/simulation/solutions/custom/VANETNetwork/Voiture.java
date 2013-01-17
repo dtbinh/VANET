@@ -22,7 +22,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	//Référencement des ressources	
 	@SuppressWarnings("unused")
 	
-	private final static String CHEMIN_ACCES_MATRICE ="C:\\Users\\Wyvern\\Dropbox\\Projet VANET\\Code MASH\\Ressources de test";
+	private final static String CHEMIN_ACCES_MATRICE ="C:\\car.png";
 	
 	private final static String SPRITE_FILENAME_RIGHT = "\\VANET.Ressources\\Sprites\\carViewRight.bmp";//FIXME
 	private final static String SPRITE_FILENAME_LEFT = "\\VANET.Ressources\\Sprites\\carViewLeft.bmp";//FIXME
