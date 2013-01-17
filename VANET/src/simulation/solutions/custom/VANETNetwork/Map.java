@@ -104,4 +104,24 @@ public class Map {
 			res += j.next().toString() + "\n";
 		return res;
 	}
+	/**
+	 * Renvoie tous les Croisements qui sont, avec name, les deux extrémités d'un arc
+	 * Ex : name=A ; les arcs sont AB, BA, AD, DE. Renverra <B,D>
+	 * @param name le nom du croisement en question
+	 * @return Les croisements autour de name, quoi.
+	 */
+	public List<Croisement> listCroisAdjacents(String name){
+		List<Croisement> res = new LinkedList<Croisement>();
+		Iterator<Arc> i = this.arcs.iterator();
+		Arc arcCourant = null;
+		while (i.hasNext()){
+			arcCourant = i.next();
+			if (arcCourant.getDebut().getName().equals(name))
+				res.add(arcCourant.getFin());
+			if (arcCourant.getFin().getName().equals(name))
+				res.add(arcCourant.getDebut());
+		}
+		return res;
+	}
 }
+

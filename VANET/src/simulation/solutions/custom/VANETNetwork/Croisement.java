@@ -1,24 +1,23 @@
 package simulation.solutions.custom.VANETNetwork;
 
 
+import simulation.entities.Agent;
+import simulation.messages.ObjectAbleToSendMessageInterface;
+import simulation.multiagentSystem.MAS;
 import simulation.utils.IntegerPosition;
 
-public class Croisement {
-	private IntegerPosition pos;
+public class Croisement extends Agent implements ObjectAbleToSendMessageInterface{
 	private String name;
+	private FeuDeSignalisation feu;
 	
-	public Croisement (IntegerPosition pos, String name){
-		this.pos = pos;
+	private static Map map = new Map(); 
+	
+	public Croisement (MAS mas, Integer id, Float energy,Integer range, String name){
+		super(mas, id, range);
 		this.name = name;
+		this.feu = new FeuDeSignalisation(Croisement.map.listCroisAdjacents(this.name));
 	}
 	
-	public Croisement (int x, int y, String name){
-		this(new IntegerPosition(x, y), name);
-	}
-	
-	public IntegerPosition getPos(){
-		return this.pos;
-	}
 	
 	public String getName(){
 		return this.name;
@@ -28,5 +27,11 @@ public class Croisement {
 	 */
 	public String toString(){
 		return this.name + " ("+this.pos.x + "," + this.pos.y + ")";
+	}
+
+	@Override
+	public void sendMessage(int receiver, String message) {
+		// TODO Auto-generated method stub
+		
 	}
 }

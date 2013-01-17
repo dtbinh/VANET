@@ -76,7 +76,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 		//	while(iteratorCheminASuivre.hasNext()){
 			
 				//aller jusqu'à la prochaine destination
-				while (! this.getPosition().equals(prochaineDestination.getPos()))
+				while (! this.getPosition().equals(prochaineDestination.getPosition()))
 				{// tant qu'on n'a pas atteint le prochain croisement
 					try {
 						Thread.sleep(100);
@@ -84,13 +84,13 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 						e.printStackTrace();
 					}
 					int deltaX = 0, deltaY = 0;
-					if (this.getPosition().x < prochaineDestination.getPos().x)
+					if (this.getPosition().x < prochaineDestination.getPosition().x)
 						deltaX = 1;
-					else if (this.getPosition().x > prochaineDestination.getPos().x)
+					else if (this.getPosition().x > prochaineDestination.getPosition().x)
 						deltaX = -1;
-					if (this.getPosition().y < prochaineDestination.getPos().y)
+					if (this.getPosition().y < prochaineDestination.getPosition().y)
 						deltaY = 1;
-					else if (this.getPosition().y > prochaineDestination.getPos().y)
+					else if (this.getPosition().y > prochaineDestination.getPosition().y)
 						deltaY = -1;
 					
 					this.setPosition(this.getPosition().x + deltaX, this.getPosition().y + deltaY);

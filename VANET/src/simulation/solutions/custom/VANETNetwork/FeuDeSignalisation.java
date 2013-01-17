@@ -1,41 +1,76 @@
 package simulation.solutions.custom.VANETNetwork;
 
-import java.util.Vector;
+import java.util.List;
 
-import simulation.entities.Agent;
-import simulation.messages.Frame;
-import simulation.messages.ObjectAbleToSendMessageInterface;
-import simulation.multiagentSystem.MAS;
-import simulation.solutions.custom.PreyPredator.Messages.PreyPredatorFrame;
-import simulation.solutions.custom.PreyPredator.Messages.PreyPredatorMessage;
-import simulation.utils.IntegerPosition;
-import simulation.views.entity.imageInputBased.ImageFileBasedObjectView;
 
 
 /**
  * Classe FeuDeSignalisation
- * 
+ * Un Croisement possède un FeuDeSignalisation, qui gère ceux qui peuvent passer
  * @author Wyvern
  *
  */
-//public  class FeuDeSignalisation extends Agent implements ObjectAbleToSendMessageInterface{
+public class FeuDeSignalisation{
 	
-/**	private final static nativeEntityView AFFICHE_DEFAULT= basic;
-	public FeuDeSignalisation(int x, int y)
-	{
-		//TODO Faire le constructue r de FeuDeSignalisation
-		super(mas, y, y, nativeEntityView);
-		FeuDeSignalisation nouvFeu = new FeuDeSignalisation(x, y);
-
+	private List<Croisement> directionsPossibles;
+	/**
+	 * Correspond à la voie qui est au vert. 
+	 * Seules les voitures venant de voieLibre peuvent passer
+	 */
+	private Croisement voieLibre; 
+	
+	public FeuDeSignalisation(List<Croisement> list) {
+		this.voieLibre = null;
+		this.directionsPossibles = list;
 		
+		if (this.directionsPossibles.size() > 0)
+			this.voieLibre = this.directionsPossibles.get(0);
 	}
 	
 	
 
-	@Override
-	public void sendMessage(int receiver, String message) {
-		// TODO Auto-generated method stub
+
+
+	/**
+	 * Crée un thread qui change régulièrement la voie autorisée.
+	 * TODO mettre les méthodes qui utilisent voieLibre en synchronized
+	 */
+	private void changerFeuRegulierement(){
 		
 	}
 	
-}*/
+	private synchronized void setVoieLibre(Croisement voie) {
+		this.voieLibre = voie;
+	}
+	
+	/**
+	 * @return the directionsPossibles
+	 */
+	public List<Croisement> getDirectionsPossibles() {
+		return this.directionsPossibles;
+	}
+
+	/**
+	 * 
+	 * @param x l'indice de la direction demandée (0 mini)
+	 * @return la référence du croisement demandé ou null si x n'est pas un indice valide
+	 */
+	public Croisement getDirectionPossible(int x) {
+		if (x > 0 && x < this.directionsPossibles.size())
+			return this.directionsPossibles.get(x);
+		else
+			return null;
+	}
+
+	/**
+	 * @param directionsPossibles the directionsPossibles to set
+	 */
+	public void setDirectionsPossibles(List<Croisement> directionsPossibles) {
+		this.directionsPossibles = directionsPossibles;
+	}
+	
+	public synchronized Croisement getVoieLibre() {
+		return this.voieLibre;
+	}
+	
+}
