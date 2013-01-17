@@ -27,6 +27,6 @@ public class Croisement {
 	 * Redéfinition de toString
 	 */
 	public String toString(){
-		return this.name + " ("+this.pos.x + "," + this.pos.y + ")\n";
+		return this.name + " ("+this.pos.x + "," + this.pos.y + ")";
 	}
 }

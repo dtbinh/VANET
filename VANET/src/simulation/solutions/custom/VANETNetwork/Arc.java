@@ -20,6 +20,6 @@ public class Arc {
 	}
 	
 	public String toString(){
-		return this.debut.toString() + this.fin.toString();
+		return this.debut.getName() + " -> " + this.fin.getName();
 	}
 }
