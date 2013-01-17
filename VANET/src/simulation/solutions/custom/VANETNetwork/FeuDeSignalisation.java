@@ -42,7 +42,7 @@ public class FeuDeSignalisation{
 	private synchronized void setVoieLibre(Croisement voie) {
 		this.voieLibre = voie;
 	}
-	
+	 
 	/**
 	 * @return the directionsPossibles
 	 */

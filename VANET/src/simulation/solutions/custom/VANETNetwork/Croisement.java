@@ -18,7 +18,7 @@ public class Croisement extends Agent implements ObjectAbleToSendMessageInterfac
 		this.feu = new FeuDeSignalisation(Croisement.map.listCroisAdjacents(this.name));
 	}
 	
-	
+	 
 	public String getName(){
 		return this.name;
 	}

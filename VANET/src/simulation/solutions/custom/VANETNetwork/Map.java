@@ -37,7 +37,7 @@ public class Map {
 				int nbCroisements = scanner.nextInt();
 				
 				for (int i = 1 ; i <= nbCroisements ; i++)
-				{
+				{ 
 					//recuperer croisement courant
 					Croisement croisCourant = new Croisement(scanner.nextInt(), scanner.nextInt(), scanner.nextLine().substring(1));
 					//l'ajouter à la liste
