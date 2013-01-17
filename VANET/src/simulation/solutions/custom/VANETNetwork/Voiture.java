@@ -30,12 +30,10 @@ import javax.print.DocFlavor.READER;
 public class Voiture extends Agent implements ObjectAbleToSendMessageInterface 
 {	
 	//Référencement des ressources	
-	private final static String CHEMIN_ACCES_MATRICE ="C:\\Users\\Wyvern\\Dropbox\\Projet VANET\\Code MASH\\Ressources de test";
+	private final static String CHEMIN_ACCES_MATRICE ="C:\\car.png";
 	private final static String SPRITE_FILENAME = "Chemin disque à remplir";//FIXME
 	private ImageFileBasedObjectView view;
-	private final static String SEPARATEUR_MATRICE_ARCS = "&&";
-	private Integer NOMBRE_VOITURE = 1;
-	private Integer NOMBRE_CROISEMENTS=9;
+	
 	
 		
 	/**
