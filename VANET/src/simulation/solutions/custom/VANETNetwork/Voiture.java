@@ -77,14 +77,9 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 		while(!isKilling() && !isStopping())
 		{
 			Iterator<Croisement>iteratorCheminASuivre = this.cheminASuivre.iterator();
-			Croisement prochaineDestination = iteratorCheminASuivre.next();			
-			
-			while(iteratorCheminASuivre.hasNext())
-			{			
-				this.allerA(prochaineDestination);
-			}
-			
-			//puis faire le dernier mouvement ?
+				
+				this.allerA(iteratorCheminASuivre.next());
+				
 			//this.isKilling();
 		}		
 	}
@@ -92,6 +87,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	@Override
 	public void sendMessage(int receiver, String message) {
 		// TODO Auto-generated method stub
+		//
 		
 	}
 	
@@ -108,6 +104,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 			} catch (InterruptedException InvalidThreadException) {
 				InvalidThreadException.printStackTrace();
 			}
+			
 			int deltaX = 0, deltaY = 0;
 			if (this.getPosition().x < dest.getPos().x)
 				deltaX = 1;
@@ -123,4 +120,8 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 			
 	}
 	
+	@Override
+	public ImageFileBasedObjectView getView() {
+		return view;
+	}
 }
