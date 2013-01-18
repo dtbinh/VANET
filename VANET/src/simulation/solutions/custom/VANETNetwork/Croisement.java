@@ -4,34 +4,45 @@ package simulation.solutions.custom.VANETNetwork;
 import simulation.entities.Agent;
 import simulation.messages.ObjectAbleToSendMessageInterface;
 import simulation.multiagentSystem.MAS;
-import simulation.utils.IntegerPosition;
 
 public class Croisement extends Agent implements ObjectAbleToSendMessageInterface{
-	private String name;
+
 	private FeuDeSignalisation feu;
 	
-	private static Map map = new Map(); 
 	
-	public Croisement (MAS mas, Integer id, Float energy,Integer range, String name){
+	public Croisement (MAS mas, Integer id, Float energy,Integer range){
 		super(mas, id, range);
-		this.name = name;
-		this.feu = new FeuDeSignalisation(Croisement.map.listCroisAdjacents(this.name));
+
+		this.feu = new FeuDeSignalisation();
 	}	
-	 
-	public String getName(){
-		return this.name;
-	}
 	
+	/**
+	 * Modifie le FeuDeSignalisation du croisement pour y ajouter "une voie adjacente"
+	 */
+	public void ajouterCroisementAdjacent(Croisement croisement){
+		this.feu.ajouterDirectionPossible(croisement);
+	}
+	 
 	/**
 	 * Redéfinition de toString
 	 */
-	/**public String toString(){
-		return this.name + " ("+this.pos.x + "," + this.pos.y + ")";
-	}*/
+	public String toString(){
+		return "Croisement " + this.getUserId() + " ("+this.getPosition().x + "," + this.getPosition().y + ")";
+	}
 
 	@Override
 	public void sendMessage(int receiver, String message) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	/**
+	 * Crée une voie à double sens reliant les deux croisements
+	 * @param c1
+	 * @param c2
+	 */
+	public static void relierCroisements(Croisement c1, Croisement c2){
+		c1.ajouterCroisementAdjacent(c2);
+		c2.ajouterCroisementAdjacent(c1);
 	}
 }
