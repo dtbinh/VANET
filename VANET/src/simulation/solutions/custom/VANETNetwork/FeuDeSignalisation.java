@@ -1,5 +1,6 @@
 package simulation.solutions.custom.VANETNetwork;
 
+import java.util.LinkedList;
 import java.util.List;
 
 
@@ -27,7 +28,10 @@ public class FeuDeSignalisation{
 			this.voieLibre = this.directionsPossibles.get(0);
 	}
 	
-	
+	public FeuDeSignalisation() {
+		this.voieLibre = null;
+		this.directionsPossibles = new LinkedList<Croisement>();
+	}
 
 
 
@@ -67,6 +71,14 @@ public class FeuDeSignalisation{
 	 */
 	public void setDirectionsPossibles(List<Croisement> directionsPossibles) {
 		this.directionsPossibles = directionsPossibles;
+	}
+	
+	/**
+	 * Ajoute une direction en plus
+	 * @param directionPossible
+	 */
+	public void ajouterDirectionPossible(Croisement directionPossible) {
+		this.directionsPossibles.add(directionPossible);
 	}
 	
 	public synchronized Croisement getVoieLibre() {
