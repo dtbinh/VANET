@@ -14,9 +14,8 @@ public class VanetNetworkSolution extends SolutionItem{
 		try{
 			Vector<Class> agents = new Vector<Class>();
 			agents.add(Class.forName("simulation.solutions.custom.VANETNetwork.Voiture"));
-			//agents.add(Class.forName("simulation.solutions.custom.VANETNetwork.Croisement"));
-			//agents.add(Class.forName("simulation.solutions.custom.VANETNetwork.FeuDeSignalisation"));
-
+			agents.add(Class.forName("simulation.solutions.custom.VANETNetwork.Croisement"));
+			
 			super.setSolution(
 					new Solution(
 							new SolutionDescriber(

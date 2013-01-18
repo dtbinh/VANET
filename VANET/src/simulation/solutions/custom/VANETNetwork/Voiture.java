@@ -6,6 +6,7 @@ import simulation.multiagentSystem.MAS;
 import simulation.utils.IntegerPosition;
 import simulation.views.entity.imageInputBased.ImageFileBasedObjectView;
 import java.util.List;
+import java.math.*;
 
 
 
@@ -21,7 +22,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	//private final static String SPRITE_FILENAME = "Chemin disque à remplir";//FIXME
 	private ImageFileBasedObjectView view;
 	
-	
+	private int TAUX_RAFRAICHISSEMENT =100; 
 		
 	/**
 	 * Temporaire : la liste des croisements à emprunter dans cet ordre, pour atteindre une destination
@@ -38,41 +39,33 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	public Voiture(MAS mas, Integer id, Float energy,Integer range)
 	{	
 		super(mas, id, range);		
+		
 		try{ view = new ImageFileBasedObjectView(SPRITE_FILENAME);}
-		catch(Exception e){}		
+		catch(Exception e){}
+		
 	}	
 	
  
 	
 	public void run()
 	{
-		// wait a little amount of time to allow the construction of others agents 
+		// wait a little amount of time to allow the construction of others agents
+		
 		try{Thread.sleep(500);}catch(Exception e){}
 		
-		while(!isKilling() && !isStopping())
-		{				
-			this.allerA(600,600);
-			this.isKilling();		
-		}
-				
+	}
+	
 		
-	}
-	
-	public void aaa()
+	public void allerA(Croisement direction)
 	{
-		System.out.println("aaaa");
-	}
-	public void aaa(int i)
-	{
-		System.out.println("aaaa"+i+"---");
-	}
-	
-	public void allerA(int x, int y)
-	{
-		while (! this.getPosition().equals(new IntegerPosition(x,y)))
-		{// tant qu'on n'a pas atteint le prochain croisement
+		int x=direction.getPosition().x;
+		int y=direction.getPosition().y;
+		
+		while (!this.getPosition().equals(direction.getPosition()))
+		{
+			// tant qu'on n'a pas atteint le prochain croisement			
 			try {
-				Thread.sleep(100);
+				Thread.sleep(TAUX_RAFRAICHISSEMENT);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -91,8 +84,29 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	}
 
 	@Override
-	public void sendMessage(int receiver, String message) {
-		// TODO Auto-generated method stub
+	public void sendMessage(int receiver, String message) 
+	{	// TODO Auto-generated method stub
 		
 	}
+	
+	public void setTauxDeRafraichissement(int nouvTaux)
+	{		
+		if (nouvTaux > 0){this.TAUX_RAFRAICHISSEMENT=nouvTaux;}
+	}
+	
+	public int getTauxDeRafraichissement()
+	{
+		return this.TAUX_RAFRAICHISSEMENT;
+	}
+	
+	public int getDistanceAutreAgent(Agent agent)
+	{
+		int deltaX= Math.abs(agent.getPosition().x-this.getPosition().x);
+		int deltaY= Math.abs(agent.getPosition().y-this.getPosition().y);		
+	
+		return (int) Math.sqrt(deltaX+deltaY);
+	}
+	
+	
+	
 }
