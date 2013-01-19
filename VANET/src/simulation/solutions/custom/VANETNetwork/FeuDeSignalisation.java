@@ -17,6 +17,7 @@ public class FeuDeSignalisation{
 	/**
 	 * Correspond à la voie qui est au vert. 
 	 * Seules les voitures venant de voieLibre peuvent passer
+	 * TODO toujours mettre les méthodes qui utilisent voieLibre en synchronized
 	 */
 	private Croisement voieLibre; 
 	
@@ -26,24 +27,29 @@ public class FeuDeSignalisation{
 		
 		if (this.directionsPossibles.size() > 0)
 			this.voieLibre = this.directionsPossibles.get(0);
+		this.changerFeuRegulierement();
 	}
 	
 	public FeuDeSignalisation() {
 		this.voieLibre = null;
 		this.directionsPossibles = new LinkedList<Croisement>();
+		this.changerFeuRegulierement();
 	}
 
 
 
 	/**
 	 * Crée un thread qui change régulièrement la voie autorisée.
-	 * TODO mettre les méthodes qui utilisent voieLibre en synchronized
 	 */
 	private void changerFeuRegulierement(){
-		
+		new Thread(new ChangerVoieAutorisee(this)).start();
 	}
 	
-	private synchronized void setVoieLibre(Croisement voie) {
+	public synchronized Croisement getVoieLibre() {
+		return this.voieLibre;
+	}
+	
+	public synchronized void setVoieLibre(Croisement voie) {
 		this.voieLibre = voie;
 	}
 	 
@@ -55,23 +61,25 @@ public class FeuDeSignalisation{
 	}
 
 	/**
-	 * 
-	 * @param x l'indice de la direction demandée (0 mini)
-	 * @return la référence du croisement demandé ou null si x n'est pas un indice valide
-	 */
-	public Croisement getDirectionPossible(int x) {
-		if (x > 0 && x < this.directionsPossibles.size())
-			return this.directionsPossibles.get(x);
-		else
-			return null;
-	}
-
-	/**
 	 * @param directionsPossibles the directionsPossibles to set
 	 */
 	public void setDirectionsPossibles(List<Croisement> directionsPossibles) {
 		this.directionsPossibles = directionsPossibles;
 	}
+	
+	/**
+	 * Obtention d'une des directions du Feu par indice
+	 * @param x l'indice de la direction demandée (0 mini)
+	 * @return la référence du croisement demandé ou null si x n'est pas un indice valide
+	 */
+	public Croisement getDirectionPossible(int x) {
+		if (x >= 0 && x < this.directionsPossibles.size())
+			return this.directionsPossibles.get(x);
+		else
+			return null;
+	}
+
+
 	
 	/**
 	 * Ajoute une direction en plus
@@ -81,8 +89,5 @@ public class FeuDeSignalisation{
 		this.directionsPossibles.add(directionPossible);
 	}
 	
-	public synchronized Croisement getVoieLibre() {
-		return this.voieLibre;
-	}
-	
+
 }

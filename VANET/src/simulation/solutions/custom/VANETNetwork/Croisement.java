@@ -45,4 +45,8 @@ public class Croisement extends Agent implements ObjectAbleToSendMessageInterfac
 		c1.ajouterCroisementAdjacent(c2);
 		c2.ajouterCroisementAdjacent(c1);
 	}
+	
+	public boolean equals(Croisement c){ //TODO réfléchir : est-ce suffisant ?
+		return this.getUserId() == c.getUserId();
+	}
 }
