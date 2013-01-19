@@ -3,10 +3,9 @@ package simulation.solutions.custom.VANETNetwork;
 import simulation.entities.Agent;
 import simulation.messages.ObjectAbleToSendMessageInterface;
 import simulation.multiagentSystem.MAS;
-import simulation.utils.IntegerPosition;
 import simulation.views.entity.imageInputBased.ImageFileBasedObjectView;
 import java.util.List;
-import java.math.*;
+
 
 
 
@@ -40,7 +39,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	{	
 		super(mas, id, range);		
 		
-		try{ view = new ImageFileBasedObjectView(SPRITE_FILENAME);}
+		try{ this.view = new ImageFileBasedObjectView(SPRITE_FILENAME);}
 		catch(Exception e){}
 		
 	}	
@@ -50,11 +49,27 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	public void run()
 	{
 		// wait a little amount of time to allow the construction of others agents
-		
 		try{Thread.sleep(500);}catch(Exception e){}
 		
 	}
 	
+	/**
+	 * Ajoute en fin de liste (cheminASuivre) le croisement donné, à condition qu'il soit relié au 
+	 * dernier croisement courant de la liste, et affiche un message d'erreur sinon
+	 * @param c
+	 */
+	public void ajouterEtape(Croisement c) {
+		if (this.cheminASuivre.isEmpty())
+			this.cheminASuivre.add(c);
+		else
+		{
+			Croisement temp = this.cheminASuivre.get(this.cheminASuivre.size() - 1);// récupérer le dernier
+			if (c.estAdjacentA(temp))
+				this.cheminASuivre.add(c);
+			else
+				System.out.println("Impossible d'ajouter le croisement (id=" + c.getUserId() + ") : non adjacent au dernier de la liste de la voiture (id=" + this.getUserId() + ")");
+		}
+	}
 		
 	public void allerA(Croisement direction)
 	{
@@ -107,6 +122,8 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 		return (int) Math.sqrt(deltaX+deltaY);
 	}
 	
-	
+	public ImageFileBasedObjectView getView() {
+		return this.view;
+	}
 	
 }

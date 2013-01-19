@@ -46,6 +46,15 @@ public class Croisement extends Agent implements ObjectAbleToSendMessageInterfac
 		c2.ajouterCroisementAdjacent(c1);
 	}
 	
+	/**
+	 * renvoie vrai si le croisement "possède une voie" pour aller jusqu'à c
+	 * @param c le croisement peut-être adjacent
+	 * @return le booléen ne tient pas compte d'éventuelles voies à sens unique
+	 */
+	public boolean estAdjacentA(Croisement c) {
+		return this.feu.contient(c);
+	}
+	
 	public boolean equals(Croisement c){ //TODO réfléchir : est-ce suffisant ?
 		return this.getUserId() == c.getUserId();
 	}

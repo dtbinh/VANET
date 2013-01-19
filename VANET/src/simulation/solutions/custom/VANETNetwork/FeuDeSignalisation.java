@@ -79,7 +79,14 @@ public class FeuDeSignalisation{
 			return null;
 	}
 
-
+	/**
+	 * renvoie true si directionsPossibles contient le croisement c et false sinon
+	 * @param c
+	 * @return
+	 */
+	public boolean contient(Croisement c) {
+		return this.directionsPossibles.contains(c);
+	}
 	
 	/**
 	 * Ajoute une direction en plus
