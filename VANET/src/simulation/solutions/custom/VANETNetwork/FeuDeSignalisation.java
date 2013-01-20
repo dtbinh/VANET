@@ -7,6 +7,7 @@ import simulation.entities.Agent;
 import simulation.messages.ObjectAbleToSendMessageInterface;
 import simulation.solutions.custom.PreyPredator.Messages.PreyPredatorFrame;
 import simulation.solutions.custom.PreyPredator.Messages.PreyPredatorMessage;
+import simulation.solutions.custom.VANETNetwork.Messages.AgentsVANETFrame;
 import simulation.solutions.custom.VANETNetwork.Messages.AgentsVANETMessage;
 
 
@@ -98,15 +99,10 @@ public class FeuDeSignalisation{
 	 * Ajoute une direction en plus
 	 * @param directionPossible
 	 */
-	public void ajouterDirectionPossible(Croisement directionPossible) {
+	public void ajouterDirectionPossible(Croisement directionPossible)
+	{
 		this.directionsPossibles.add(directionPossible);
 	}
 	
-	public void sendMessage(int typeMessage) 
-	{
-		if(typeMessage.equals(VOIE_LIBRE))
-			this.sendFrame(new PreyPredatorFrame(getUserId(), receiver, new PreyPredatorMessage(getUserId(),receiver,PreyPredatorMessage.HOWl,getPosition())));
-		else if(message.equals(BITE))
-			this.sendFrame(new PreyPredatorFrame(getUserId(), receiver, new PreyPredatorMessage(getUserId(),receiver,PreyPredatorMessage.BITE,getPosition())));
-	}
+	
 }
