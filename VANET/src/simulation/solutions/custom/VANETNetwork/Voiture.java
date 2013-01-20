@@ -1,6 +1,7 @@
 package simulation.solutions.custom.VANETNetwork;
 
 import simulation.entities.Agent;
+import simulation.messages.Frame;
 import simulation.messages.ObjectAbleToSendMessageInterface;
 import simulation.multiagentSystem.MAS;
 import simulation.views.entity.imageInputBased.ImageFileBasedObjectView;
@@ -119,11 +120,23 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 		int deltaX= Math.abs(agent.getPosition().x-this.getPosition().x);
 		int deltaY= Math.abs(agent.getPosition().y-this.getPosition().y);		
 	
-		return (int) Math.sqrt(deltaX+deltaY);
+		return (int) Math.sqrt(deltaX*deltaX+deltaY*deltaY);
 	}
 	
 	public ImageFileBasedObjectView getView() {
 		return this.view;
 	}
 	
+	//Prototype de fonction gérant la circulation de la voiture (à détacher en thread plus tard): 
+	public void circuler()
+	{
+		//Si le message s'adresse à moi
+		if(Frame.getReceiver()==Frame.BROADCAST || frame.getReceiver() = this.getUserID)
+		{
+			//Alors on va décortiquer le contenu
+			
+		}
+		
+	
+	}
 }

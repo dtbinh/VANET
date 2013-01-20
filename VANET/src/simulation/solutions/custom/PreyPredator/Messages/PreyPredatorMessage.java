@@ -2,7 +2,6 @@ package simulation.solutions.custom.PreyPredator.Messages;
 
 import java.nio.ByteBuffer;
 
-import simulation.messages.Frame;
 import simulation.messages.Message;
 import simulation.utils.IntegerPosition;
 

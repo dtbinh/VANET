@@ -6,7 +6,7 @@ import simulation.utils.IntegerPosition;
  * @author Wyvern
  *
  */
-public class AgentsVanetsMessages {
+public class VoituresMessages {
 	
 	private int senderID;
 	private int receiverID;
@@ -18,7 +18,7 @@ public class AgentsVanetsMessages {
 	public static final byte FEU_DE_SIGNALISATION=1;	
 	public static final byte CROISEMENT=2;
 	
-	public AgentsVanetsMessages(int sender, int receiver, byte senderType, IntegerPosition senderPosition)
+	public VoituresMessages(int sender, int receiver, byte senderType, IntegerPosition senderPosition)
 	{
 		this.senderID=sender;
 		this.receiverID=receiver;
@@ -34,8 +34,7 @@ public class AgentsVanetsMessages {
 	public int getSender()
 	{
 		return this.senderID;
-	}
-	
+	}	
 	
 	public IntegerPosition getPositionAgent() {
 		return positionAgent;
