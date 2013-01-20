@@ -131,7 +131,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	public void circuler()
 	{
 		//Si le message s'adresse à moi
-		if(Frame.getReceiver()==Frame.BROADCAST || frame.getReceiver() = this.getUserID)
+		if(Frame.getReceiver()==Frame.BROADCAST || frame.getReceiver() == this.getUserID)
 		{
 			//Alors on va décortiquer le contenu
 			

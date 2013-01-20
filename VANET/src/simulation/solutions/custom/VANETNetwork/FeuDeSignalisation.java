@@ -3,6 +3,12 @@ package simulation.solutions.custom.VANETNetwork;
 import java.util.LinkedList;
 import java.util.List;
 
+import simulation.entities.Agent;
+import simulation.messages.ObjectAbleToSendMessageInterface;
+import simulation.solutions.custom.PreyPredator.Messages.PreyPredatorFrame;
+import simulation.solutions.custom.PreyPredator.Messages.PreyPredatorMessage;
+import simulation.solutions.custom.VANETNetwork.Messages.AgentsVANETMessage;
+
 
 
 /**
@@ -96,5 +102,11 @@ public class FeuDeSignalisation{
 		this.directionsPossibles.add(directionPossible);
 	}
 	
-
+	public void sendMessage(int typeMessage) 
+	{
+		if(typeMessage.equals(VOIE_LIBRE))
+			this.sendFrame(new PreyPredatorFrame(getUserId(), receiver, new PreyPredatorMessage(getUserId(),receiver,PreyPredatorMessage.HOWl,getPosition())));
+		else if(message.equals(BITE))
+			this.sendFrame(new PreyPredatorFrame(getUserId(), receiver, new PreyPredatorMessage(getUserId(),receiver,PreyPredatorMessage.BITE,getPosition())));
+	}
 }
