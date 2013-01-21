@@ -37,6 +37,8 @@ public class Croisement extends Agent implements ObjectAbleToSendMessageInterfac
 	@Override
 	public void sendMessage(int receiver, String message) {
 		// TODO Auto-generated method stub
+		//TODO à finir
+		//AgentsVANETMessage nouvMessage = new AgentsVANETMessae
 		
 	}
 	
@@ -63,8 +65,10 @@ public class Croisement extends Agent implements ObjectAbleToSendMessageInterfac
 		return this.getUserId() == c.getUserId();
 	}
 	
-	public void sendMessage() 
-	{
+	//TODO a supprimer
+//	public void sendMessage() a supprimer
+	//{
+		/*
 		try{ 	//Création message contenant les informations du feu de signalisation
 				AgentsVANETMessage nouvMessageAWrapper = AgentsVANETMessage(AgentsVANETMessage.FEU_DE_SIGNALISATION,AgentsVANETMessage.VOITURE,AgentsVANETMessage.VOIE_LIBRE)
 					
@@ -74,9 +78,9 @@ public class Croisement extends Agent implements ObjectAbleToSendMessageInterfac
 				//Création d'une frame prête à être envoyée et intégration du byte[]
 				AgentsVANETFrame nouvFrameAEnvoyer = AgentsVANETFrame(this.getUserId(),Frame.BROADCAST, nouvMessageAWrapper);
 				this.sendMessage(nouvFrameAEnvoyer);}
-		catch(Exception e) {}	
+				catch(Exception e) {}	
 				
 				
-		}
-	}
+		*/
+//	}
 }

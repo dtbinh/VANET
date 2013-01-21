@@ -36,14 +36,16 @@ public class AgentsVANETFrame extends Frame
 	public Message getMessage() //throws InvalidFrameException ?
 	{
 		ByteBuffer buffer = ByteBuffer.wrap(this.getData());
-		byte type= buffer.get();
-		
-		//En construction : Le return doit retourner un message contenant les informations envoyée dans la frame 
-		try {if(type == AgentsVANETMessage.VOIE_LIBRE)
-			return new AgentsVANETMessage(this.d);}
-		catch (Exception InvalidFrameException){;}		
-	
+		int typeReceveur = buffer.getInt();
+		int typeEnvoyeur = buffer.getInt();
+		IntegerPosition positionAgent = new IntegerPosition(buffer.getInt(),buffer.getInt());
+		int typeMessage = buffer.getInt();		
+
+			return new AgentsVANETMessage(typeReceveur,typeEnvoyeur, positionAgent,typeMessage);		
 	}
+	
+	
+	 //TODO implémenter méthode permettant de filtrer le message en fonction e l'id receiver et du type receveur;
 }
 
 

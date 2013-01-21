@@ -38,7 +38,7 @@ public class AgentsVANETMessage extends Message{
 	
 	//===Constructeur de messages ==//
 	
-	public AgentsVANETMessage(int typeEnvoyeur, int typeReceveur,IntegerPosition pos, int typeMessage)
+	public AgentsVANETMessage(int typeReceveur, int typeEnvoyeur,IntegerPosition pos, int typeMessage)
 	{
 		this.typeEnvoyeur=typeEnvoyeur;
 		this.setTypeReceveur(typeReceveur);
@@ -101,9 +101,15 @@ public class AgentsVANETMessage extends Message{
 	{
 		//On prépare le messages, içi la taille 500 sera à réduire 
 		//TODO : Trouver al fonction permettant d'avoir une taille adaptée 
-		return (ByteBuffer.allocate(500).putInt(positionAgent.x).putInt(positionAgent.y).putInt(typeEnvoyeur).putInt(typeReceveur).putInt(typeMessage).array());
+		return (ByteBuffer.allocate(500).putInt(typeReceveur).putInt(typeEnvoyeur).putInt(positionAgent.x).putInt(positionAgent.y).putInt(typeMessage).array());
 	
 	}
+	
+	 public AgentsVANETMessage arrayToMessage(byte[] data)
+	 {
+		 AgentsVANETMessage messageExtrait = new AgentsVANETMessage(data[1],data[2], new IntegerPosition(data[3],data[4]),data[5] );
+		 return messageExtrait;
+	 }
 
 	/* (non-Javadoc)
 	 * @see simulation.messages.Message#getReceiver()

@@ -50,7 +50,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	public void run()
 	{
 		// wait a little amount of time to allow the construction of others agents
-		try{Thread.sleep(500);}catch(Exception e){}
+		try{Thread.sleep(500);}catch(Exception e){}		
 		
 	}
 	
@@ -75,7 +75,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	public void allerA(Croisement direction)
 	{
 		int x=direction.getPosition().x;
-		int y=direction.getPosition().y;
+		int y=direction.getPosition().y;	
 		
 		while (!this.getPosition().equals(direction.getPosition()))
 		{
@@ -123,12 +123,13 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 		return (int) Math.sqrt(deltaX*deltaX+deltaY*deltaY);
 	}
 	
-	public ImageFileBasedObjectView getView() {
+	public ImageFileBasedObjectView getView() 
+	{
 		return this.view;
 	}
 	
 	//Prototype de fonction gérant la circulation de la voiture (à détacher en thread plus tard): 
-	public void circuler()
+	/*public void circuler()
 	{
 		//Si le message s'adresse à moi
 		if(frame.getReceiver()==Frame.BROADCAST || frame.getReceiver() == this.getUserID)
@@ -138,5 +139,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 		}
 		
 	
-	}
+	}*/
+	
+	
 }
