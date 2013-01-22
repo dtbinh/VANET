@@ -1431,7 +1431,10 @@ public class WDMainWindow implements EventMapNotificationInterface,InterfaceEnti
 			ImageIO.write(img, "BMP", new File(fileName));
 		} 
 		catch (Exception e)
-		{
+		{   
+			System.err.println("fff:"+fileName);
+			System.err.println("rrr"+WDMainWindow.DEFAULT_TEMP_FOLDER);
+			System.err.flush();
 			e.printStackTrace();
 		}
 

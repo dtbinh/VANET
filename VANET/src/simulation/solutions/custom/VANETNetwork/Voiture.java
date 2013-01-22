@@ -4,6 +4,7 @@ import simulation.entities.Agent;
 import simulation.messages.Frame;
 import simulation.messages.ObjectAbleToSendMessageInterface;
 import simulation.multiagentSystem.MAS;
+import simulation.multiagentSystem.ObjectSystemIdentifier;
 import simulation.views.entity.imageInputBased.ImageFileBasedObjectView;
 import java.util.List;
 
@@ -51,6 +52,10 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	{
 		// wait a little amount of time to allow the construction of others agents
 		try{Thread.sleep(500);}catch(Exception e){}		
+		while (true){
+			try{Thread.sleep(5);}catch(Exception e){}	
+			this.allerA(1);
+		}
 		
 	}
 	
@@ -72,13 +77,17 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 		}
 	}
 		
-	public void allerA(Croisement direction)
+	public void allerA(int idCroisement)
 	{
+		System.out.println("Entrée dans AllerA");
+		Croisement direction =(Croisement) this.getMAS().getSimulatedObject(new ObjectSystemIdentifier(idCroisement)).getObject();
+		System.out.println(direction);
 		int x=direction.getPosition().x;
 		int y=direction.getPosition().y;	
 		
-		while (!this.getPosition().equals(direction.getPosition()))
+		if(!this.getPosition().equals(direction.getPosition()))
 		{
+			System.out.print("+");
 			// tant qu'on n'a pas atteint le prochain croisement			
 			try {
 				Thread.sleep(TAUX_RAFRAICHISSEMENT);
@@ -97,6 +106,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 			
 			this.setPosition(this.getPosition().x + deltaX, this.getPosition().y + deltaY);
 		}
+		
 	}
 
 	@Override
@@ -126,6 +136,12 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	public ImageFileBasedObjectView getView() 
 	{
 		return this.view;
+	}
+	
+	
+	public void test(int i,String s)
+	{
+		System.out.println("\ni="+i+"  s="+s);
 	}
 	
 	//Prototype de fonction gérant la circulation de la voiture (à détacher en thread plus tard): 

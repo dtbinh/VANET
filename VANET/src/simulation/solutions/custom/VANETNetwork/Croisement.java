@@ -34,6 +34,15 @@ public class Croisement extends Agent implements ObjectAbleToSendMessageInterfac
 		return "Croisement " + this.getUserId() + " ("+this.getPosition().x + "," + this.getPosition().y + ")";
 	}
 
+	public void run()
+	{
+		// wait a little amount of time to allow the construction of others agents
+		try{Thread.sleep(500);}catch(Exception e){}		
+		while (true){
+			try{Thread.sleep(5);}catch(Exception e){}		
+		}
+		
+	}
 	@Override
 	public void sendMessage(int receiver, String message) {
 		// TODO Auto-generated method stub
