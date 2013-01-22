@@ -1,16 +1,33 @@
 package simulation.solutions.custom.VANETNetwork;
-
+/**
+ * Objet gérant le changement de voie_Libre
+ * c'est une classe à part car l'externaliser du feu de signalisation est la solution optimale
+ */
 import java.util.Iterator;
 
 public class ChangerVoieAutorisee implements Runnable {
 	
+	/**
+	 * Feu de signalisation qui va recevoir les ordres de changement de voie
+	 */
 	private FeuDeSignalisation feu;
 	
+	//J'espère pour toi que j'ai pas besoin de définir cet attribut
 	public static final int TEMPS_MS_ENTRE_2_CHANGEMENTS = 5000;
 	
+	/**
+	 * Accesseur en ecriture à l'attribut feu	
+	 * @param feu
+	 */
 	public ChangerVoieAutorisee(FeuDeSignalisation feu) {
 		this.feu = feu;
 	}
+	
+	/**
+	 * Fonction principale de "maintient" d'activité de changerVoieAutorisee, permet d'appeller des fonctions, attention seulement à ne pas les rendre bloquantes.
+	 * 
+	 * Note: ChangerVoieAutorisee disparaît lors de la fin de l'execution de run() 
+	 */
 	
 	@Override
 	public void run() {

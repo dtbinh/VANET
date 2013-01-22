@@ -1,19 +1,32 @@
 package simulation.solutions.custom.VANETNetwork;
-
+/**
+ * La classe croisement sert de support au feux de signalisation et leurs référencement permet de tisser la map.
+ * @Author Reykjanes 
+ */
 
 import simulation.entities.Agent;
-import simulation.messages.Frame;
 import simulation.messages.ObjectAbleToSendMessageInterface;
 import simulation.multiagentSystem.MAS;
-import simulation.solutions.custom.VANETNetwork.Messages.AgentsVANETFrame;
-import simulation.solutions.custom.VANETNetwork.Messages.AgentsVANETMessage;
 
 public class Croisement extends Agent implements ObjectAbleToSendMessageInterface{
 
+	/** 
+	 * Un croisement a un feu de signalisation s'occupant de référencer les directions possibles et de réguler le traffic 
+	 */
 	private FeuDeSignalisation feu;
 	
 	
-	
+	/**
+	 * Constructeur par défaut appellé lors de la création du croisement (la création est gérée par MASH)
+	 * Il faut considérer les paramètres comme invariant quoiqu'il arrive (tout comme le super constructeur et ses paramètre)
+	 * 	sinon le constructeur n'est pas reconnu, et le croisement ne peut être créée.
+	 * 
+	 *  Note: Il est possible de mettre des instructions supplémentaire après le super-constructeur.
+	 * @param mas
+	 * @param id
+	 * @param energy
+	 * @param range
+	 */
 	public Croisement (MAS mas, Integer id, Float energy,Integer range){
 		super(mas, id, range);
 
@@ -33,7 +46,12 @@ public class Croisement extends Agent implements ObjectAbleToSendMessageInterfac
 	public String toString(){
 		return "Croisement " + this.getUserId() + " ("+this.getPosition().x + "," + this.getPosition().y + ")";
 	}
-
+	
+	/**
+	 * Fonction principale de "maintient" d'activité du croisement, permet d'appeller des fonctions, attention seulement à ne pas les rendre bloquantes.
+	 * 
+	 * Note: Le croisement disparaît lors de la fin de l'execution de run() 
+	 */
 	public void run()
 	{
 		// wait a little amount of time to allow the construction of others agents
@@ -53,12 +71,20 @@ public class Croisement extends Agent implements ObjectAbleToSendMessageInterfac
 	
 	/**
 	 * Crée une voie à double sens reliant les deux croisements
-	 * @param c1
-	 * @param c2
+	 * @param c1 premier croisement
+	 * @param c2 deuxième croisement
 	 */
 	public static void relierCroisements(Croisement c1, Croisement c2){
 		c1.ajouterCroisementAdjacent(c2);
 		c2.ajouterCroisementAdjacent(c1);
+	}
+	/**
+	 * Crée une voie à sens unique, la paramètre étant le croisement où "la rue" à sens unique mène
+	 * @param croisementDest un croisement
+	 */
+	public void ajouterVoieSensUnique(Croisement croisementDest)
+	{
+		this.ajouterCroisementAdjacent(croisementDest);
 	}
 	
 	/**
@@ -74,22 +100,4 @@ public class Croisement extends Agent implements ObjectAbleToSendMessageInterfac
 		return this.getUserId() == c.getUserId();
 	}
 	
-	//TODO a supprimer
-//	public void sendMessage() a supprimer
-	//{
-		/*
-		try{ 	//Création message contenant les informations du feu de signalisation
-				AgentsVANETMessage nouvMessageAWrapper = AgentsVANETMessage(AgentsVANETMessage.FEU_DE_SIGNALISATION,AgentsVANETMessage.VOITURE,AgentsVANETMessage.VOIE_LIBRE)
-					
-				//Transcription du message en byte[]
-				byte[] transcriptionMessageAWrapper = nouvMessageAWrapper.toByteSequence();
-			
-				//Création d'une frame prête à être envoyée et intégration du byte[]
-				AgentsVANETFrame nouvFrameAEnvoyer = AgentsVANETFrame(this.getUserId(),Frame.BROADCAST, nouvMessageAWrapper);
-				this.sendMessage(nouvFrameAEnvoyer);}
-				catch(Exception e) {}	
-				
-				
-		*/
-//	}
 }

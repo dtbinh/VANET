@@ -12,13 +12,19 @@ import simulation.utils.IntegerPosition;
 @SuppressWarnings("serial")
 public class AgentsVANETMessage extends Message{
 	
-	//==========Informations nécessaire à l'utilisation d'un message=============//
-	
+	//TODO verifier si je dis pas de conner*es
+	/**
+	 * Principaux attributs d'un message.
+	 * 
+	 * Un message est un objet stockant des informations, lors de l'envoi ces informatiions seront stockées dans une int[] normalisé	
+	 */
 	
 	private IntegerPosition positionAgent;	
 	public int typeEnvoyeur;
 	private int typeReceveur;
-	
+	/**
+	 * Constantes codant le type de l'agent
+	 */
 	//On référence tous lea identifaint des agents	
 	public static final int VOITURE=0;
 	public static final int FEU_DE_SIGNALISATION=1;
@@ -28,15 +34,23 @@ public class AgentsVANETMessage extends Message{
 	
 			//TODO : Si on en a finit avec l'ajout de nouveaux champs, il faut essayer dès que possible mettre des type byte au lieu d'int pour optimiser; 
 	/**
-	 * Un champs d'une frame sera le type de message
+	 * Attribut coandt le type de message, celui-ci stocke les constantes ci-dessous
 	 */
 	public int typeMessage;
 	
-	// On référence tout les types de message (liste provisoire) içi voie libre sert a identifer le message lorsqu'une
+	/**
+	 * Constante pouvant être stockées dans l'attribut typeMessage.
+	 */
 	public static final int VOIE_LIBRE=0;
 	public static final int ECHANGE_DE_POSITION=1;
 	
-	//===Constructeur de messages ==//
+	/**
+	 * Costructeur de message 
+	 * @param typeReceveur
+	 * @param typeEnvoyeur
+	 * @param pos
+	 * @param typeMessage
+	 */
 	
 	public AgentsVANETMessage(int typeReceveur, int typeEnvoyeur,IntegerPosition pos, int typeMessage)
 	{
@@ -46,57 +60,67 @@ public class AgentsVANETMessage extends Message{
 		this.positionAgent=pos;
 	}
 	
-	//====================METHODE DE MANIPULATION DES MESSAGES===============//
+	/**
+	 * Liste des différents accesseur en lecture des attributs d'un objet message
+	 * @return
+	 */
 	
 	public int getTypeReceveur() 
 	{
 		return typeReceveur;
-	}
-
-	public void setTypeReceveur(int typeReceveur) 
-	{
-		this.typeReceveur = typeReceveur;
-	}
+	}	
 	
 	public int getTypeEnvoyeur()
 	{
 		return this.typeEnvoyeur;
 	}
 	
-	public void setTypeEnvoyeur(int nouvTypeEnvoyeur)
+	public int getTypeMessage()
 	{
-		this.typeEnvoyeur=nouvTypeEnvoyeur;
-	}
+		return this.typeMessage;
+	}	
 	
 	public IntegerPosition getPositionAgent() 
 	{
 		return positionAgent;
 	}
 	
+	/**
+	 * Liste des accesseur en écriture des attributs de l'objet message  
+	 * @return
+	 */	
+	
+	public void setTypeEnvoyeur(int nouvTypeEnvoyeur)
+	{
+		this.typeEnvoyeur=nouvTypeEnvoyeur;
+	}
+	
+	public void setTypeReceveur(int typeReceveur) 
+	{
+		this.typeReceveur = typeReceveur;
+	}
+	
 	public void setPositionAgent(IntegerPosition positionAgent) 
 	{
 		this.positionAgent = positionAgent;
-	}
-	
-	public int getTypeMessage()
-	{
-		return this.typeMessage;
-	}
+	}	
 	
 	public void setTypeMessage(int nouvTypeMessage)
 	{
 		this.typeMessage=nouvTypeMessage;
 	}
 	
-	
-	
-	//==============METHODE DE NORMALISATION DU MESSAGE EN VUE D'UNE INTEGRATION DANS LA FRAME=========//
-	
+
 	/**
-	 * Méthode permettant de transcrire les information de l'objet FeuDeSignalisation 
+	 * Méthode permettant de transcrire les informations de l'objet FeuDeSignalisation 
 	 * dans un tableau de Byte
+	 * 
+	 * Fonctions extrêmement importante, elle code en tableau de byte les attributs de l'objet message en vue d'une expedition.
+	 * 
+	 * NOTE: L'ordre est important et va induire un décodage lors de l'extraction des informations dans cet ordre précis
+	 * @param data 
+	 * @return
 	 */
-	
 	public byte[] toByteSequence()
 	{
 		//On prépare le messages, içi la taille 500 sera à réduire 
@@ -104,6 +128,17 @@ public class AgentsVANETMessage extends Message{
 		return (ByteBuffer.allocate(500).putInt(typeReceveur).putInt(typeEnvoyeur).putInt(positionAgent.x).putInt(positionAgent.y).putInt(typeMessage).array());
 	
 	}
+	
+	/**
+	 * Méthode permettant de transcrire les information de l'objet FeuDeSignalisation 
+	 * dans un tableau de Byte
+	 * 
+	 * Fonctions extrêmement importante, elle code en tableau de byte les attributs de l'objet message en vue d'une expedition.
+	 * 
+	 * NOTE: L'ordre est important car la fonction de codage est liée à la fonction de décodage
+	 * @param data 
+	 * @return
+	 */
 	
 	 public AgentsVANETMessage arrayToMessage(byte[] data)
 	 {

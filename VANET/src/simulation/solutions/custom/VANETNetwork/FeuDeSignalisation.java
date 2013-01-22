@@ -3,14 +3,6 @@ package simulation.solutions.custom.VANETNetwork;
 import java.util.LinkedList;
 import java.util.List;
 
-import simulation.entities.Agent;
-import simulation.messages.ObjectAbleToSendMessageInterface;
-import simulation.solutions.custom.PreyPredator.Messages.PreyPredatorFrame;
-import simulation.solutions.custom.PreyPredator.Messages.PreyPredatorMessage;
-import simulation.solutions.custom.VANETNetwork.Messages.AgentsVANETFrame;
-import simulation.solutions.custom.VANETNetwork.Messages.AgentsVANETMessage;
-
-
 
 /**
  * Classe FeuDeSignalisation
@@ -20,7 +12,9 @@ import simulation.solutions.custom.VANETNetwork.Messages.AgentsVANETMessage;
  */
 public class FeuDeSignalisation{
 	
+	//Attribut servant de références pour l'orientation des voitures (une sorte de panneau de signalisation
 	private List<Croisement> directionsPossibles;
+	
 	/**
 	 * Correspond à la voie qui est au vert. 
 	 * Seules les voitures venant de voieLibre peuvent passer
@@ -28,6 +22,10 @@ public class FeuDeSignalisation{
 	 */
 	private Croisement voieLibre; 
 	
+	/**
+	 * Constructeur et instanciateur d'un feu
+	 * @param list des croisements adjacents
+	 */
 	public FeuDeSignalisation(List<Croisement> list) {
 		this.voieLibre = null;
 		this.directionsPossibles = list;
@@ -37,6 +35,9 @@ public class FeuDeSignalisation{
 		this.changerFeuRegulierement();
 	}
 	
+	/**
+	 * Constructeur par défaut
+	 */
 	public FeuDeSignalisation() {
 		this.voieLibre = null;
 		this.directionsPossibles = new LinkedList<Croisement>();
@@ -51,16 +52,23 @@ public class FeuDeSignalisation{
 	private void changerFeuRegulierement(){
 		new Thread(new ChangerVoieAutorisee(this)).start();
 	}
-	
+	/**
+	 * Accesseur sécurisé en lecture permettant de récupérer l'attribut VoieLibre
+	 * @return un croisement
+	 */
 	public synchronized Croisement getVoieLibre() {
 		return this.voieLibre;
 	}
-	
+	/**
+	 * Accesseur sécurisé en écriture permettant de  modifier l'attribut VoieLibre
+	 * @param voie la nouvelle directions possible
+	 */
 	public synchronized void setVoieLibre(Croisement voie) {
 		this.voieLibre = voie;
 	}
 	 
-	/**
+	/** 
+	 * Accesseur en lecture des directions possibles
 	 * @return the directionsPossibles
 	 */
 	public List<Croisement> getDirectionsPossibles() {
@@ -68,6 +76,7 @@ public class FeuDeSignalisation{
 	}
 
 	/**
+	 * Accesseur en ecriture des directions possibles
 	 * @param directionsPossibles the directionsPossibles to set
 	 */
 	public void setDirectionsPossibles(List<Croisement> directionsPossibles) {
@@ -88,8 +97,8 @@ public class FeuDeSignalisation{
 
 	/**
 	 * renvoie true si directionsPossibles contient le croisement c et false sinon
-	 * @param c
-	 * @return
+	 * @param c un objet croisement
+	 * @return un boolean
 	 */
 	public boolean contient(Croisement c) {
 		return this.directionsPossibles.contains(c);

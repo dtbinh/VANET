@@ -11,6 +11,9 @@ import simulation.solutions.custom.VANETNetwork.Exceptions.InvalidFrameException
 import simulation.utils.IntegerPosition;
 
 /**
+ * Classe définissant un objet Frame.
+ * 
+ * Note: Pour plus d'information -> Checkez la classe machineFrame.java 
  * @author Reykjanes
  *
  */
@@ -20,6 +23,8 @@ public class AgentsVANETFrame extends Frame
 	//TODO: Verifier la structure de donnée suivante : 
 	//	- Une frame contient les ID brutes de l'envoyeur 
 	//	- Dans un message on stock la cible-type du message (ex: voiture)
+	
+	
 	/** 
 	 * Constructeur d'une frame
 	 * @param sender ID de l'expediteur
@@ -32,7 +37,10 @@ public class AgentsVANETFrame extends Frame
 		super(sender,receiver,data);
 	}
 	
-	@Override
+	/**
+	 * Méthode extrayant les données de l'attribut message dans un ordre précis puisque celui-ci a été formaté.
+	 * @return Message un objet message
+	 */
 	public Message getMessage() //throws InvalidFrameException ?
 	{
 		ByteBuffer buffer = ByteBuffer.wrap(this.getData());

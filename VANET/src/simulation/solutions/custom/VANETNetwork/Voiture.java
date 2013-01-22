@@ -1,7 +1,6 @@
 package simulation.solutions.custom.VANETNetwork;
 
 import simulation.entities.Agent;
-import simulation.messages.Frame;
 import simulation.messages.ObjectAbleToSendMessageInterface;
 import simulation.multiagentSystem.MAS;
 import simulation.multiagentSystem.ObjectSystemIdentifier;
@@ -9,18 +8,19 @@ import simulation.views.entity.imageInputBased.ImageFileBasedObjectView;
 import java.util.List;
 
 
-
-
 /**
  * Classe publique correspondant aux voitures & à leurs comportement
+ * 
+ * Attention: Les méthodes implémentées autres que run() doivent être non-bloquante
  * @author Wyvern
  *
  */
 public class Voiture extends Agent implements ObjectAbleToSendMessageInterface 
 {	
-	//Référencement des ressources	
-	private final static String SPRITE_FILENAME ="C:\\croisement.png";
-	//private final static String SPRITE_FILENAME = "Chemin disque à remplir";//FIXME
+	//Référencement des ressources, via le chemin absolu
+	private final static String SPRITE_FILENAME ="C:\\car.png";
+	
+	//Attribut permettant l'affichage d'une vue personnalisée via un sprite.
 	private ImageFileBasedObjectView view;
 	
 	private int TAUX_RAFRAICHISSEMENT =100; 
@@ -33,10 +33,14 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	private List<Croisement> cheminASuivre;
 	
 	/**
-	 * TODO cf doc de cheminASuivre : plus tard, les voitures n'auront pas accès à la map complète
+	 * Constructeur par défaut appellé lors de la création de la voiture (la création est gérée par MASH)
+	 * Il faut considérer les paramètres comme invariant quoiqu'il arrive (tout comme le super constructeur et ses paramètre)
+	 * 	sinon le constructeur n'est pas reconnu, et la voiture ne peut être créée. 
+	 * @param mas
+	 * @param id
+	 * @param energy
+	 * @param range
 	 */
-	//private static Map map = new Map();
-	
 	public Voiture(MAS mas, Integer id, Float energy,Integer range)
 	{	
 		super(mas, id, range);		
@@ -47,7 +51,11 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	}	
 	
  
-	
+	/**
+	 * Fonction principale de "maintient" d'activité de la voiture, permet d'appeller des fonctions, attention seulement à ne pas les rendre bloquantes.
+	 * 
+	 * Note: La voiture disparaît lors de la fin de l'execution de run() 
+	 */
 	public void run()
 	{
 		// wait a little amount of time to allow the construction of others agents
@@ -77,23 +85,18 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 		}
 	}
 		
+	/**
+	 * Fonction permettant de faire "un pas" vers la destination. 
+	 * @param idCroisement l'ID de l'agent destination: ex: dans le scénario, Agent_42 a un idCroisement de 42
+	 */
 	public void allerA(int idCroisement)
 	{
-		System.out.println("Entrée dans AllerA");
 		Croisement direction =(Croisement) this.getMAS().getSimulatedObject(new ObjectSystemIdentifier(idCroisement)).getObject();
-		System.out.println(direction);
 		int x=direction.getPosition().x;
 		int y=direction.getPosition().y;	
 		
 		if(!this.getPosition().equals(direction.getPosition()))
 		{
-			System.out.print("+");
-			// tant qu'on n'a pas atteint le prochain croisement			
-			try {
-				Thread.sleep(TAUX_RAFRAICHISSEMENT);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
 			int deltaX = 0, deltaY = 0;
 			if (this.getPosition().x < x)
 				deltaX = 1;
@@ -115,16 +118,29 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 		
 	}
 	
+	/**
+	 * Accesseur en écriture du taux de rafraichissement
+	 * @param nouvTaux 
+	 */
 	public void setTauxDeRafraichissement(int nouvTaux)
 	{		
 		if (nouvTaux > 0){this.TAUX_RAFRAICHISSEMENT=nouvTaux;}
 	}
 	
+	/**
+	 * Accesseur en lecture du taux de rafraichissement
+	 * @return
+	 */
 	public int getTauxDeRafraichissement()
 	{
 		return this.TAUX_RAFRAICHISSEMENT;
 	}
 	
+	/**
+	 * Fonction calculant la distance entre deux agents en récupérant les coordonnées de l'agent passé en paramètre
+	 * @param agent l'agent cible
+	 * @return la distance agent(this) <-> agent cible
+	 */
 	public int getDistanceAutreAgent(Agent agent)
 	{
 		int deltaX= Math.abs(agent.getPosition().x-this.getPosition().x);
@@ -133,16 +149,14 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 		return (int) Math.sqrt(deltaX*deltaX+deltaY*deltaY);
 	}
 	
+	/**
+	 * Accesseur en lecture de la vue (sprite, caractère ascii, etc..) celle-ci s'affiche dans l'environnement MASH, elle ne retourne donc rien.
+	 */
 	public ImageFileBasedObjectView getView() 
 	{
 		return this.view;
 	}
 	
-	
-	public void test(int i,String s)
-	{
-		System.out.println("\ni="+i+"  s="+s);
-	}
 	
 	//Prototype de fonction gérant la circulation de la voiture (à détacher en thread plus tard): 
 	/*public void circuler()
