@@ -6,13 +6,15 @@ import java.util.List;
 
 /**
  * Classe FeuDeSignalisation
- * Un Croisement possède un FeuDeSignalisation, qui gère ceux qui peuvent passer
+ * Un Croisement possède un FeuDeSignalisation, qui gère ceux qui peuvent passer et vers où
  * @author Wyvern
  *
  */
 public class FeuDeSignalisation{
 	
-	//Attribut servant de références pour l'orientation des voitures (une sorte de panneau de signalisation
+	/**
+	 * Attribut servant de références pour l'orientation des voitures (une sorte de panneau de signalisation)
+	 */
 	private List<Croisement> directionsPossibles;
 	
 	/**
@@ -45,7 +47,6 @@ public class FeuDeSignalisation{
 	}
 
 
-
 	/**
 	 * Crée un thread qui change régulièrement la voie autorisée.
 	 */
@@ -60,7 +61,7 @@ public class FeuDeSignalisation{
 		return this.voieLibre;
 	}
 	/**
-	 * Accesseur sécurisé en écriture permettant de  modifier l'attribut VoieLibre
+	 * Accesseur sécurisé en écriture permettant de modifier l'attribut VoieLibre
 	 * @param voie la nouvelle directions possible
 	 */
 	public synchronized void setVoieLibre(Croisement voie) {
@@ -98,7 +99,7 @@ public class FeuDeSignalisation{
 	/**
 	 * renvoie true si directionsPossibles contient le croisement c et false sinon
 	 * @param c un objet croisement
-	 * @return un boolean
+	 * @return un booléen
 	 */
 	public boolean contient(Croisement c) {
 		return this.directionsPossibles.contains(c);

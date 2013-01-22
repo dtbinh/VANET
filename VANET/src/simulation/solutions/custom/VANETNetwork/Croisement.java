@@ -1,6 +1,6 @@
 package simulation.solutions.custom.VANETNetwork;
 /**
- * La classe croisement sert de support au feux de signalisation et leurs référencement permet de tisser la map.
+ * La classe croisement sert de support aux feux de signalisation et leurs référencements permet de tisser la map.
  * @Author Reykjanes 
  */
 
@@ -11,17 +11,18 @@ import simulation.multiagentSystem.MAS;
 public class Croisement extends Agent implements ObjectAbleToSendMessageInterface{
 
 	/** 
-	 * Un croisement a un feu de signalisation s'occupant de référencer les directions possibles et de réguler le traffic 
+	 * Un croisement a un feu de signalisation s'occupant de référencer les directions possibles à partir de ce point 
+	 * et de réguler le traffic 
 	 */
 	private FeuDeSignalisation feu;
 	
 	
 	/**
-	 * Constructeur par défaut appellé lors de la création du croisement (la création est gérée par MASH)
-	 * Il faut considérer les paramètres comme invariant quoiqu'il arrive (tout comme le super constructeur et ses paramètre)
-	 * 	sinon le constructeur n'est pas reconnu, et le croisement ne peut être créée.
+	 * Constructeur par défaut appelé lors de la création du croisement (la création est gérée par MASH)
+	 * Il faut considérer les paramètres comme invariants quoiqu'il arrive (tout comme le super constructeur et ses paramètres)
+	 * sinon le constructeur n'est pas reconnu, et le croisement ne peut être créé.
 	 * 
-	 *  Note: Il est possible de mettre des instructions supplémentaire après le super-constructeur.
+	 * Note: Il est possible de mettre des instructions supplémentaires après le super-constructeur.
 	 * @param mas
 	 * @param id
 	 * @param energy
@@ -48,8 +49,8 @@ public class Croisement extends Agent implements ObjectAbleToSendMessageInterfac
 	}
 	
 	/**
-	 * Fonction principale de "maintient" d'activité du croisement, permet d'appeller des fonctions, attention seulement à ne pas les rendre bloquantes.
-	 * 
+	 * Fonction principale de "maintien" d'activité du croisement, permet d'appeler des fonctions, attention seulement à ne pas les rendre bloquantes.
+	 * run est appelée automatiquement par MASH lors du lancement de la simulation
 	 * Note: Le croisement disparaît lors de la fin de l'execution de run() 
 	 */
 	public void run()

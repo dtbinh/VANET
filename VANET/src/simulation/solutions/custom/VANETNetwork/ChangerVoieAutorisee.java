@@ -1,6 +1,6 @@
 package simulation.solutions.custom.VANETNetwork;
 /**
- * Objet gérant le changement de voie_Libre
+ * Objet gérant le changement de voieLibre
  * c'est une classe à part car l'externaliser du feu de signalisation est la solution optimale
  */
 import java.util.Iterator;
@@ -12,7 +12,9 @@ public class ChangerVoieAutorisee implements Runnable {
 	 */
 	private FeuDeSignalisation feu;
 	
-	//J'espère pour toi que j'ai pas besoin de définir cet attribut
+	/**
+	 * J'espère pour toi que j'ai pas besoin de définir cet attribut... (MS = millisecondes)
+	 */
 	public static final int TEMPS_MS_ENTRE_2_CHANGEMENTS = 5000;
 	
 	/**
@@ -24,9 +26,8 @@ public class ChangerVoieAutorisee implements Runnable {
 	}
 	
 	/**
-	 * Fonction principale de "maintient" d'activité de changerVoieAutorisee, permet d'appeller des fonctions, attention seulement à ne pas les rendre bloquantes.
-	 * 
-	 * Note: ChangerVoieAutorisee disparaît lors de la fin de l'execution de run() 
+	 * méthode redéfinie qui sera appelée automatiquement un fois qu'on aura fait leThread.start()
+	 * Contient l'algorithme principal du thread (changer le feu à intervalles réguliers)
 	 */
 	
 	@Override

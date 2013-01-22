@@ -9,20 +9,27 @@ import java.util.List;
 
 
 /**
- * Classe publique correspondant aux voitures & à leurs comportement
+ * Classe publique correspondant aux voitures & à leur comportement
  * 
- * Attention: Les méthodes implémentées autres que run() doivent être non-bloquante
+ * Attention: Les méthodes implémentées autres que run() doivent être non-bloquantes
  * @author Wyvern
  *
  */
 public class Voiture extends Agent implements ObjectAbleToSendMessageInterface 
 {	
-	//Référencement des ressources, via le chemin absolu
+	/**
+	 * Référencement des ressources, via le chemin absolu
+	 */
 	private final static String SPRITE_FILENAME ="C:\\car.png";
 	
-	//Attribut permettant l'affichage d'une vue personnalisée via un sprite.
+	/**
+	 * Attribut permettant l'affichage d'une vue personnalisée via un sprite.
+	 */
 	private ImageFileBasedObjectView view;
 	
+	/**
+	 * En gros, la vitesse du véhicule. Une valeur élevée indique un véhicule lent
+	 */
 	private int TAUX_RAFRAICHISSEMENT =100; 
 		
 	/**
@@ -33,9 +40,9 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	private List<Croisement> cheminASuivre;
 	
 	/**
-	 * Constructeur par défaut appellé lors de la création de la voiture (la création est gérée par MASH)
-	 * Il faut considérer les paramètres comme invariant quoiqu'il arrive (tout comme le super constructeur et ses paramètre)
-	 * 	sinon le constructeur n'est pas reconnu, et la voiture ne peut être créée. 
+	 * Constructeur par défaut appelé lors de la création de la voiture (la création est gérée par MASH)
+	 * Il faut considérer les paramètres comme invariants quoiqu'il arrive (tout comme le super constructeur et ses paramètres)
+	 * sinon le constructeur n'est pas reconnu, et la voiture ne peut être créée. 
 	 * @param mas
 	 * @param id
 	 * @param energy
@@ -52,8 +59,8 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	
  
 	/**
-	 * Fonction principale de "maintient" d'activité de la voiture, permet d'appeller des fonctions, attention seulement à ne pas les rendre bloquantes.
-	 * 
+	 * Fonction principale de "maintien" d'activité de la voiture, permet d'appeler des fonctions, attention seulement à ne pas les rendre bloquantes.
+	 * run est appelée automatiquement par MASH lors du lancement de la simulation
 	 * Note: La voiture disparaît lors de la fin de l'execution de run() 
 	 */
 	public void run()
@@ -91,6 +98,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	 */
 	public void allerA(int idCroisement)
 	{
+		// On récupère le croisement correspondant à cet id
 		Croisement direction =(Croisement) this.getMAS().getSimulatedObject(new ObjectSystemIdentifier(idCroisement)).getObject();
 		int x=direction.getPosition().x;
 		int y=direction.getPosition().y;	

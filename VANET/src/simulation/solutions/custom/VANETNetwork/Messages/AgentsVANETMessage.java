@@ -16,7 +16,7 @@ public class AgentsVANETMessage extends Message{
 	/**
 	 * Principaux attributs d'un message.
 	 * 
-	 * Un message est un objet stockant des informations, lors de l'envoi ces informatiions seront stockées dans une int[] normalisé	
+	 * Un message est un objet stockant des informations, lors de l'envoi ces informations seront stockées dans une int[] normalisé	
 	 */
 	
 	private IntegerPosition positionAgent;	
@@ -25,27 +25,27 @@ public class AgentsVANETMessage extends Message{
 	/**
 	 * Constantes codant le type de l'agent
 	 */
-	//On référence tous lea identifaint des agents	
+	//On référence tous les identifiants des agents	
 	public static final int VOITURE=0;
 	public static final int FEU_DE_SIGNALISATION=1;
 	public static final int CROISEMENT=2;
-			//TODO : verifier si ce champs est utile (un croisement,  première vue n'envoie pas de message tout seul, c'est le feu de signalisation par
+			//TODO : verifier si ce champ est utile (un croisement, à première vue n'envoie pas de message tout seul, c'est le feu de signalisation par
 			//l'intermediaire du croisement qui fait le boulot
 	
-			//TODO : Si on en a finit avec l'ajout de nouveaux champs, il faut essayer dès que possible mettre des type byte au lieu d'int pour optimiser; 
+			//TODO : Si on en a fini avec l'ajout de nouveaux champs, il faut essayer dès que possible de mettre des type byte au lieu d'int pour optimiser; 
 	/**
-	 * Attribut coandt le type de message, celui-ci stocke les constantes ci-dessous
+	 * Attribut codant le type de message, celui-ci stocke les constantes ci-dessous
 	 */
 	public int typeMessage;
 	
 	/**
-	 * Constante pouvant être stockées dans l'attribut typeMessage.
+	 * Constantes pouvant être stockées dans l'attribut typeMessage.
 	 */
 	public static final int VOIE_LIBRE=0;
 	public static final int ECHANGE_DE_POSITION=1;
 	
 	/**
-	 * Costructeur de message 
+	 * Constructeur de message 
 	 * @param typeReceveur
 	 * @param typeEnvoyeur
 	 * @param pos
@@ -61,7 +61,7 @@ public class AgentsVANETMessage extends Message{
 	}
 	
 	/**
-	 * Liste des différents accesseur en lecture des attributs d'un objet message
+	 * Liste des différents accesseurs en lecture des attributs d'un objet message
 	 * @return
 	 */
 	
@@ -86,7 +86,7 @@ public class AgentsVANETMessage extends Message{
 	}
 	
 	/**
-	 * Liste des accesseur en écriture des attributs de l'objet message  
+	 * Liste des accesseurs en écriture des attributs de l'objet message  
 	 * @return
 	 */	
 	
@@ -115,29 +115,24 @@ public class AgentsVANETMessage extends Message{
 	 * Méthode permettant de transcrire les informations de l'objet FeuDeSignalisation 
 	 * dans un tableau de Byte
 	 * 
-	 * Fonctions extrêmement importante, elle code en tableau de byte les attributs de l'objet message en vue d'une expedition.
+	 * Fonction extrêmement importante, elle code en tableau de byte les attributs de l'objet message en vue d'une expédition.
 	 * 
 	 * NOTE: L'ordre est important et va induire un décodage lors de l'extraction des informations dans cet ordre précis
-	 * @param data 
-	 * @return
+	 * @return le message sous forme de byte[]
 	 */
 	public byte[] toByteSequence()
 	{
 		//On prépare le messages, içi la taille 500 sera à réduire 
-		//TODO : Trouver al fonction permettant d'avoir une taille adaptée 
+		//TODO : Trouver la fonction permettant d'avoir une taille adaptée 
 		return (ByteBuffer.allocate(500).putInt(typeReceveur).putInt(typeEnvoyeur).putInt(positionAgent.x).putInt(positionAgent.y).putInt(typeMessage).array());
 	
 	}
 	
 	/**
-	 * Méthode permettant de transcrire les information de l'objet FeuDeSignalisation 
-	 * dans un tableau de Byte
-	 * 
-	 * Fonctions extrêmement importante, elle code en tableau de byte les attributs de l'objet message en vue d'une expedition.
-	 * 
-	 * NOTE: L'ordre est important car la fonction de codage est liée à la fonction de décodage
-	 * @param data 
-	 * @return
+	 * Méthode inverse de toByteSequence : décortique un tableau de byte et en fait un Message
+	 * L'ordre est important
+	 * @param data
+	 * @return le message extrait
 	 */
 	
 	 public AgentsVANETMessage arrayToMessage(byte[] data)
@@ -152,6 +147,7 @@ public class AgentsVANETMessage extends Message{
 	@Override
 	public int getReceiver() {
 		// TODO Auto-generated method stub
+		//FIXME c'est censé être quoi, là ? idem pour sender
 		return 0;
 	}
 

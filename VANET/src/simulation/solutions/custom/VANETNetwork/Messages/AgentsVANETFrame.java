@@ -49,7 +49,7 @@ public class AgentsVANETFrame extends Frame
 		IntegerPosition positionAgent = new IntegerPosition(buffer.getInt(),buffer.getInt());
 		int typeMessage = buffer.getInt();		
 
-			return new AgentsVANETMessage(typeReceveur,typeEnvoyeur, positionAgent,typeMessage);		
+		return new AgentsVANETMessage(typeReceveur,typeEnvoyeur, positionAgent,typeMessage);		
 	}
 	
 	
