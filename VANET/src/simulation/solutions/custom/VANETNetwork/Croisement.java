@@ -7,6 +7,7 @@ package simulation.solutions.custom.VANETNetwork;
 import simulation.entities.Agent;
 import simulation.messages.ObjectAbleToSendMessageInterface;
 import simulation.multiagentSystem.MAS;
+import simulation.multiagentSystem.ObjectSystemIdentifier;
 
 public class Croisement extends Agent implements ObjectAbleToSendMessageInterface{
 
@@ -36,9 +37,11 @@ public class Croisement extends Agent implements ObjectAbleToSendMessageInterfac
 	
 	/**
 	 * Modifie le FeuDeSignalisation du croisement pour y ajouter "une voie adjacente"
+	 * Nécessaire pour qu'une voiture puisse aller de ce Croisement à l'autre
+	 * Ne fonctionne que dans un sens (pas de route depuis c vers this)
 	 */
-	public void ajouterCroisementAdjacent(Croisement croisement){
-		this.feu.ajouterDirectionPossible(croisement);
+	public void ajouterCroisementAdjacent(Croisement c){
+		this.feu.ajouterDirectionPossible(c);
 	}
 	 
 	/**
@@ -64,20 +67,19 @@ public class Croisement extends Agent implements ObjectAbleToSendMessageInterfac
 	}
 	@Override
 	public void sendMessage(int receiver, String message) {
-		// TODO Auto-generated method stub
 		//TODO à finir
 		//AgentsVANETMessage nouvMessage = new AgentsVANETMessae
 		
 	}
 	
 	/**
-	 * Crée une voie à double sens reliant les deux croisements
-	 * @param c1 premier croisement
-	 * @param c2 deuxième croisement
+	 * Crée une voie à double sens reliant les deux croisements (dont this)
+	 * @param idAutreCroisement ...C'est pas assez clair ?
 	 */
-	public static void relierCroisements(Croisement c1, Croisement c2){
-		c1.ajouterCroisementAdjacent(c2);
-		c2.ajouterCroisementAdjacent(c1);
+	public void relierCroisements(int idAutreCroisement){
+		Croisement autreCroisement = (Croisement) this.getMAS().getSimulatedObject(new ObjectSystemIdentifier(idAutreCroisement)).getObject();
+		this.ajouterCroisementAdjacent(autreCroisement);
+		autreCroisement.ajouterCroisementAdjacent(this);
 	}
 	/**
 	 * Crée une voie à sens unique, la paramètre étant le croisement où "la rue" à sens unique mène

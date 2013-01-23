@@ -5,6 +5,9 @@ import simulation.messages.ObjectAbleToSendMessageInterface;
 import simulation.multiagentSystem.MAS;
 import simulation.multiagentSystem.ObjectSystemIdentifier;
 import simulation.views.entity.imageInputBased.ImageFileBasedObjectView;
+
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 
@@ -20,7 +23,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	/**
 	 * Référencement des ressources, via le chemin absolu
 	 */
-	private final static String SPRITE_FILENAME ="C:\\car.png";
+	private final static String SPRITE_FILENAME ="VANET.Ressources\\Sprites\\carViewUp.bmp";
 	
 	/**
 	 * Attribut permettant l'affichage d'une vue personnalisée via un sprite.
@@ -30,7 +33,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	/**
 	 * En gros, la vitesse du véhicule. Une valeur élevée indique un véhicule lent
 	 */
-	private int TAUX_RAFRAICHISSEMENT =100; 
+	private int TAUX_RAFRAICHISSEMENT =70; 
 		
 	/**
 	 * Temporaire : la liste des croisements à emprunter dans cet ordre, pour atteindre une destination
@@ -38,6 +41,8 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	 * TODO Enlever attribut et javadoc une fois devenus inutiles
 	 */
 	private List<Croisement> cheminASuivre;
+	/// NOTE : La commande pour récupérer un Croisement à partir de son id :
+	// Croisement direction =(Croisement) this.getMAS().getSimulatedObject(new ObjectSystemIdentifier(idCroisement)).getObject();
 	
 	/**
 	 * Constructeur par défaut appelé lors de la création de la voiture (la création est gérée par MASH)
@@ -51,9 +56,15 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	public Voiture(MAS mas, Integer id, Float energy,Integer range)
 	{	
 		super(mas, id, range);		
-		
-		try{ this.view = new ImageFileBasedObjectView(SPRITE_FILENAME);}
-		catch(Exception e){}
+
+		this.cheminASuivre = new LinkedList<Croisement>();
+		try{
+			this.view = new ImageFileBasedObjectView(SPRITE_FILENAME);
+			System.out.println("Image Voiture chargée");
+		}
+		catch(Exception e){
+			System.out.println("Impossible de charger le fichier " + Voiture.SPRITE_FILENAME);
+		}
 		
 	}	
 	
@@ -67,19 +78,43 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	{
 		// wait a little amount of time to allow the construction of others agents
 		try{Thread.sleep(500);}catch(Exception e){}		
-		while (true){
-			try{Thread.sleep(5);}catch(Exception e){}	
-			this.allerA(1);
-		}
 		
+		Iterator<Croisement> iteratorDestinations = this.cheminASuivre.iterator();
+		Croisement destinationCourante = null;
+		
+		if (iteratorDestinations.hasNext()) // On initialise la 1ère destination. Si la liste était vide, destinationCourante reste à null
+			destinationCourante = iteratorDestinations.next();
+
+		while(!isKilling() && !isStopping()) // TODO et destinationCourante != null ???
+		{
+			try {
+				Thread.sleep(this.TAUX_RAFRAICHISSEMENT);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			
+			if (destinationCourante != null) 
+			{// Si il reste des destinations à atteindre
+				allerVers(destinationCourante);
+				
+				if (destinationCourante.getPosition().equal(this.getPosition()))
+				{// Si on est arrivé à la destination courante
+					if (iteratorDestinations.hasNext())
+						destinationCourante = iteratorDestinations.next();
+					else
+						destinationCourante = null;
+				}
+			}
+		}
 	}
 	
 	/**
 	 * Ajoute en fin de liste (cheminASuivre) le croisement donné, à condition qu'il soit relié au 
 	 * dernier croisement courant de la liste, et affiche un message d'erreur sinon
-	 * @param c
+	 * @param 
 	 */
-	public void ajouterEtape(Croisement c) {
+	public void ajouterEtape(int idCroisement) {
+		Croisement c =(Croisement) this.getMAS().getSimulatedObject(new ObjectSystemIdentifier(idCroisement)).getObject();
 		if (this.cheminASuivre.isEmpty())
 			this.cheminASuivre.add(c);
 		else
@@ -94,12 +129,10 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 		
 	/**
 	 * Fonction permettant de faire "un pas" vers la destination. 
-	 * @param idCroisement l'ID de l'agent destination: ex: dans le scénario, Agent_42 a un idCroisement de 42
+	 * @param l'agent destination
 	 */
-	public void allerA(int idCroisement)
+	public void allerVers(Croisement direction)
 	{
-		// On récupère le croisement correspondant à cet id
-		Croisement direction =(Croisement) this.getMAS().getSimulatedObject(new ObjectSystemIdentifier(idCroisement)).getObject();
 		int x=direction.getPosition().x;
 		int y=direction.getPosition().y;	
 		

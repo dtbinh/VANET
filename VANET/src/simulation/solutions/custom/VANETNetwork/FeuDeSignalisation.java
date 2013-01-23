@@ -112,6 +112,11 @@ public class FeuDeSignalisation{
 	public void ajouterDirectionPossible(Croisement directionPossible)
 	{
 		this.directionsPossibles.add(directionPossible);
+		
+		//Et on décide que la voie libre courante est directionPossible si elle n'était pas initialisée 
+		//(normal, car il n'y avait aucun Croisement dans la liste lors du constructeur)
+		if (this.voieLibre == null)
+			this.voieLibre = directionPossible;
 	}
 	
 	
