@@ -5,9 +5,12 @@ package simulation.solutions.custom.VANETNetwork;
  */
 
 import simulation.entities.Agent;
+import simulation.messages.Frame;
 import simulation.messages.ObjectAbleToSendMessageInterface;
 import simulation.multiagentSystem.MAS;
 import simulation.multiagentSystem.ObjectSystemIdentifier;
+import simulation.solutions.custom.VANETNetwork.Messages.AgentsVANETFrame;
+import simulation.solutions.custom.VANETNetwork.Messages.AgentsVANETMessage;
 
 public class Croisement extends Agent implements ObjectAbleToSendMessageInterface{
 
@@ -17,7 +20,7 @@ public class Croisement extends Agent implements ObjectAbleToSendMessageInterfac
 	 */
 	private FeuDeSignalisation feu;
 	
-	
+	private final String DIRE_QUI_PEUT_PASSER = "DIRE_QUI_PEUT_PASSER";
 	/**
 	 * Constructeur par défaut appelé lors de la création du croisement (la création est gérée par MASH)
 	 * Il faut considérer les paramètres comme invariants quoiqu'il arrive (tout comme le super constructeur et ses paramètres)
@@ -61,15 +64,16 @@ public class Croisement extends Agent implements ObjectAbleToSendMessageInterfac
 		// wait a little amount of time to allow the construction of others agents
 		try{Thread.sleep(500);}catch(Exception e){}		
 		while (true){
-			try{Thread.sleep(5);}catch(Exception e){}		
+			try{Thread.sleep(100);}catch(Exception e){}		
+			this.sendMessage(Frame.BROADCAST, DIRE_QUI_PEUT_PASSER);
 		}
 		
 	}
 	@Override
 	public void sendMessage(int receiver, String message) {
-		//TODO à finir
-		//AgentsVANETMessage nouvMessage = new AgentsVANETMessae
-		
+		if (message.equals(DIRE_QUI_PEUT_PASSER))
+			this.sendFrame(new AgentsVANETFrame(getUserId(), receiver, new AgentsVANETMessage(getUserId(),receiver, AgentsVANETMessage.DIRE_QUI_PEUT_PASSER,this.feu.getVoieLibre().getUserId())));
+		//else if je cherche à envoyer un message de type T...
 	}
 	
 	/**
@@ -85,8 +89,7 @@ public class Croisement extends Agent implements ObjectAbleToSendMessageInterfac
 	 * Crée une voie à sens unique, la paramètre étant le croisement où "la rue" à sens unique mène
 	 * @param croisementDest un croisement
 	 */
-	public void ajouterVoieSensUnique(Croisement croisementDest)
-	{
+	public void ajouterVoieSensUnique(Croisement croisementDest) {
 		this.ajouterCroisementAdjacent(croisementDest);
 	}
 	

@@ -7,8 +7,6 @@ import java.nio.ByteBuffer;
 
 import simulation.messages.Frame;
 import simulation.messages.Message;
-import simulation.solutions.custom.VANETNetwork.Exceptions.InvalidFrameException;
-import simulation.utils.IntegerPosition;
 
 /**
  * Classe définissant un objet Frame.
@@ -28,13 +26,17 @@ public class AgentsVANETFrame extends Frame
 	/** 
 	 * Constructeur d'une frame
 	 * @param sender ID de l'expediteur
-	 * @param receiver ID du receveur, dont une des valeur est BROADCAST
+	 * @param receiver ID du receveur, dont une des valeurs possibles est BROADCAST
 	 * @param data le tableau de byte construit grace à la classe AgentVANETMessage, 
-	 * 				c'est un transcription des informations contenues dans l'objet message en tableau de byte
+	 * c'est un transcription des informations contenues dans l'objet message en tableau de byte
 	 */
 	public AgentsVANETFrame(int sender, int receiver,byte[] data)
 	{
 		super(sender,receiver,data);
+	}
+	
+	public AgentsVANETFrame(int sender, int receiver,Message msg){
+		super(sender,receiver,msg);
 	}
 	
 	/**
@@ -44,16 +46,14 @@ public class AgentsVANETFrame extends Frame
 	public Message getMessage() //throws InvalidFrameException ?
 	{
 		ByteBuffer buffer = ByteBuffer.wrap(this.getData());
-		int typeReceveur = buffer.getInt();
-		int typeEnvoyeur = buffer.getInt();
-		IntegerPosition positionAgent = new IntegerPosition(buffer.getInt(),buffer.getInt());
-		int typeMessage = buffer.getInt();		
+		byte type= buffer.get();
 
-		return new AgentsVANETMessage(typeReceveur,typeEnvoyeur, positionAgent,typeMessage);		
+		if (type == AgentsVANETMessage.DIRE_QUI_PEUT_PASSER) 
+			return new AgentsVANETMessage(buffer.getInt(), buffer.getInt(), type, buffer.getInt());
+
+		System.out.println("Error in the encapsulation of the frame data");
+		return null;		
 	}
-	
-	
-	 //TODO implémenter méthode permettant de filtrer le message en fonction e l'id receiver et du type receveur;
 }
 
 

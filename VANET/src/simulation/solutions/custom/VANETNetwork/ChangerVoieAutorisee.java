@@ -15,7 +15,7 @@ public class ChangerVoieAutorisee implements Runnable {
 	/**
 	 * J'espère pour toi que j'ai pas besoin de définir cet attribut... (MS = millisecondes)
 	 */
-	public static final int TEMPS_MS_ENTRE_2_CHANGEMENTS = 5000;
+	public static final int TEMPS_MS_ENTRE_2_CHANGEMENTS = 2000;
 	
 	/**
 	 * Accesseur en ecriture à l'attribut feu	

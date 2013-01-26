@@ -19,9 +19,19 @@ public class AgentsVANETMessage extends Message{
 	 * Un message est un objet stockant des informations, lors de l'envoi ces informations seront stockées dans une int[] normalisé	
 	 */
 	
+	/**
+	 * Pour certains messages, ni la position de l'envoyeur ni celle du receveur n'importent.
+	 * FIXME remanier le constructeur ou en créer d'autres lorsqu'on s'en servira
+	 */
 	private IntegerPosition positionAgent;	
-	public int typeEnvoyeur;
-	private int typeReceveur;
+
+	private int senderID;
+	private int receiverID;
+	/**
+	 * Utilisé dans les messages de feux rouges.
+	 * Contient l'id de la voie (du Croisement qu'on trouve au bout de cette voie) qui est au vert. Une et une seule voie par Croisement peut être au vert.
+	 */
+	private int voieLibre;
 	/**
 	 * Constantes codant le type de l'agent
 	 */
@@ -36,28 +46,28 @@ public class AgentsVANETMessage extends Message{
 	/**
 	 * Attribut codant le type de message, celui-ci stocke les constantes ci-dessous
 	 */
-	public int typeMessage;
+	private byte typeMessage;
 	
 	/**
 	 * Constantes pouvant être stockées dans l'attribut typeMessage.
+	 * Indiquent le "genre de message"
 	 */
-	public static final int VOIE_LIBRE=0;
-	public static final int ECHANGE_DE_POSITION=1;
+	public static final byte VOIE_LIBRE=0;
+	public static final byte ECHANGE_DE_POSITION=1;
+	public static final byte DIRE_QUI_PEUT_PASSER=2;
 	
 	/**
-	 * Constructeur de message 
-	 * @param typeReceveur
-	 * @param typeEnvoyeur
-	 * @param pos
-	 * @param typeMessage
+	 * Constructeur de message.
+	 * Il est possible d'avoir plusieurs constructeurs en fonction des besoins, ou sinon on peut passer tous les paramètres, 
+	 * en mettant 0 ou null pour ceux qui ne servent pas dans les appels qui ne les utilisent pas
 	 */
 	
-	public AgentsVANETMessage(int typeReceveur, int typeEnvoyeur,IntegerPosition pos, int typeMessage)
+	public AgentsVANETMessage(int sender, int receiver, byte type, int idVoieAuVert)
 	{
-		this.typeEnvoyeur=typeEnvoyeur;
-		this.setTypeReceveur(typeReceveur);
-		this.typeMessage=typeMessage;
-		this.positionAgent=pos;
+		this.senderID=sender;
+		this.receiverID=receiver;
+		this.typeMessage=type;
+		this.voieLibre = idVoieAuVert;//voieLibre est un int, on retransformera en Croisement plus tard... ou pas (au choix, en fonction des besoins)
 	}
 	
 	/**
@@ -65,23 +75,11 @@ public class AgentsVANETMessage extends Message{
 	 * @return
 	 */
 	
-	public int getTypeReceveur() 
-	{
-		return typeReceveur;
-	}	
-	
-	public int getTypeEnvoyeur()
-	{
-		return this.typeEnvoyeur;
-	}
-	
-	public int getTypeMessage()
-	{
+	public byte getTypeMessage() {
 		return this.typeMessage;
 	}	
 	
-	public IntegerPosition getPositionAgent() 
-	{
+	public IntegerPosition getPositionAgent() {
 		return positionAgent;
 	}
 	
@@ -90,23 +88,12 @@ public class AgentsVANETMessage extends Message{
 	 * @return
 	 */	
 	
-	public void setTypeEnvoyeur(int nouvTypeEnvoyeur)
-	{
-		this.typeEnvoyeur=nouvTypeEnvoyeur;
-	}
-	
-	public void setTypeReceveur(int typeReceveur) 
-	{
-		this.typeReceveur = typeReceveur;
-	}
-	
-	public void setPositionAgent(IntegerPosition positionAgent) 
-	{
+	public void setPositionAgent(IntegerPosition positionAgent) {
 		this.positionAgent = positionAgent;
 	}	
 	
-	public void setTypeMessage(int nouvTypeMessage)
-	{
+	/// FIXME Est-ce vraiment utile ?
+	public void setTypeMessage(byte nouvTypeMessage) {
 		this.typeMessage=nouvTypeMessage;
 	}
 	
@@ -122,10 +109,15 @@ public class AgentsVANETMessage extends Message{
 	 */
 	public byte[] toByteSequence()
 	{
-		//On prépare le messages, içi la taille 500 sera à réduire 
 		//TODO : Trouver la fonction permettant d'avoir une taille adaptée 
-		return (ByteBuffer.allocate(500).putInt(typeReceveur).putInt(typeEnvoyeur).putInt(positionAgent.x).putInt(positionAgent.y).putInt(typeMessage).array());
-	
+		if(this.typeMessage==DIRE_QUI_PEUT_PASSER)
+			return ByteBuffer.allocate(50).put(this.typeMessage).putInt(this.senderID).putInt(receiverID).putInt(this.voieLibre).array();
+		//else if == ...
+		else
+		{
+			System.out.println("PROBLEME : Un message ne possède pas un typeMessage cohérent");
+			return null;
+		}
 	}
 	
 	/**
@@ -134,32 +126,19 @@ public class AgentsVANETMessage extends Message{
 	 * @param data
 	 * @return le message extrait
 	 */
-	
-	 public AgentsVANETMessage arrayToMessage(byte[] data)
-	 {
-		 AgentsVANETMessage messageExtrait = new AgentsVANETMessage(data[1],data[2], new IntegerPosition(data[3],data[4]),data[5] );
-		 return messageExtrait;
-	 }
 
-	/* (non-Javadoc)
-	 * @see simulation.messages.Message#getReceiver()
-	 */
 	@Override
 	public int getReceiver() {
-		// TODO Auto-generated method stub
-		//FIXME c'est censé être quoi, là ? idem pour sender
-		return 0;
+		return this.receiverID;
 	}
-
-	/* (non-Javadoc)
-	 * @see simulation.messages.Message#getSender()
-	 */
+	
 	@Override
 	public int getSender() {
-		// TODO Auto-generated method stub
-		return 0;
+		return this.senderID;
 	}
 	
-	
+	public int getVoieLibre(){
+		return this.voieLibre;
+	}
 
 }
