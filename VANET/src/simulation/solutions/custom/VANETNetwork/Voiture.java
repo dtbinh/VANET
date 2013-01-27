@@ -44,6 +44,10 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	private boolean peutBouger;
 	
 	/**
+	 * Attribut indiquant si le vehicule pattrouille
+	 */
+	private boolean modePatrouille;
+	/**
 	 * Indique d'où vient la voiture. Utile pour savoir "sur quelle voie" (entre ça et le prochain croisement) elle se trouve actuellement
 	 * Très important, car tant qu'une voiture possède dernierCroisementParcouru à null, c'est comme si elle n'était nulle part (<=> sur aucune voie, car 
 	 * elle serait considérée comme étant positionnée entre destinationCourante et null
@@ -121,7 +125,11 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 						if (iteratorDestinations.hasNext())
 							this.destinationCourante = iteratorDestinations.next();
 						else
-							this.destinationCourante = null;
+							if(this.modePatrouille)
+							{ 
+								// Il faut trouver un moyen de récupérer la liste inverse ou de repartir du début							
+							}
+							else{this.destinationCourante = null;}
 					}
 				}				
 			}
@@ -192,6 +200,25 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	 */
 	public void setTauxDeRafraichissement(int nouvTaux)	{		
 		if (nouvTaux > 0){this.TAUX_RAFRAICHISSEMENT=nouvTaux;}
+	}
+	
+	/**
+	 * Accesseur en lecture du mode patrouille
+	 */
+	
+	public boolean getModePatrouille()
+	{
+		return this.modePatrouille;
+	}
+	
+	/**
+	 * Accesseur en écriture de l'attribut mode patrouile
+	 *  
+	 */
+	
+	public void setModePatrouille(boolean nouvMode)
+	{
+		this.modePatrouille=nouvMode;
 	}
 	
 	/**
