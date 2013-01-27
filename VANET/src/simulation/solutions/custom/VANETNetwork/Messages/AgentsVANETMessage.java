@@ -52,8 +52,8 @@ public class AgentsVANETMessage extends Message{
 	 * Constantes pouvant être stockées dans l'attribut typeMessage.
 	 * Indiquent le "genre de message"
 	 */
-	public static final byte VOIE_LIBRE=0;
-	public static final byte ECHANGE_DE_POSITION=1;
+	public static final byte VOIE_LIBRE=0;//FIXME peut-etre à enlever si c'est inclus dans DIRE_QUI_PEUT_PASSER
+	public static final byte ECHANGE_DE_POSITION=1;//FIXME trouver mieux que ce nom tout pourri
 	public static final byte DIRE_QUI_PEUT_PASSER=2;
 	
 	/**

@@ -80,6 +80,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 		this.dernierCroisementParcouru = null;
 		this.cheminASuivre = new LinkedList<Croisement>();
 		this.destinationCourante = null;
+		this.modePatrouille = false;
 		try{
 			this.view = new ImageFileBasedObjectView(SPRITE_FILENAME);
 			System.out.println("Image Voiture chargée");
@@ -122,6 +123,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 					if (this.destinationCourante.getPosition().equal(this.getPosition()))
 					{// Si on est arrivé à la destination courante
 						this.dernierCroisementParcouru = this.destinationCourante;
+						this.destinationCourante.quitterCroisement(this.getUserId());// On considère ne plus être sur le croisement, les autres peuvent passer		
 						if (iteratorDestinations.hasNext())
 							this.destinationCourante = iteratorDestinations.next();
 						else
@@ -164,8 +166,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	public void setDernierCroisementParcouru(int idCroisement) {
 		this.dernierCroisementParcouru = (Croisement) this.getMAS().getSimulatedObject(new ObjectSystemIdentifier(idCroisement)).getObject();
 	}
-	
-	
+		
 	/**
 	 * Fonction permettant de faire "un pas" vers la destination. 
 	 * @param l'agent destination
@@ -192,8 +193,6 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 		
 	}
 
-
-	
 	/**
 	 * Accesseur en écriture du taux de rafraichissement
 	 * @param nouvTaux 
@@ -206,11 +205,18 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	 * Accesseur en lecture du mode patrouille
 	 */
 	
-	public boolean getModePatrouille()
-	{
+	public boolean getModePatrouille() {
 		return this.modePatrouille;
 	}
 	
+	/**
+	 * Setter de peutBouger
+	 * FIXME changer le nom de la méthode quand le nom de la variable aura changé
+	 * @param b la nouvelle valeur booléenne de l'attribut
+	 */
+	public void setPeutBouger(boolean b) {
+		this.peutBouger = b;//FIXME autorise(ou pas) le mouvement concernant le feu rouge, mais ne devrait pas l'autoriser dans tous les cas (ex : si quelqu'un est juste devant). Il est en tout cas faux de dire "Maintenant on a le droit de bouger, c'est sûr". (=> avoir plusieurs booléens ? Au minimum changer le nom de celui-ci)
+	}
 	/**
 	 * Accesseur en écriture de l'attribut mode patrouile
 	 *  
@@ -254,22 +260,14 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 			AgentsVANETMessage msg = (AgentsVANETMessage) frame.getMessage();			
 			if(msg.getTypeMessage()==AgentsVANETMessage.DIRE_QUI_PEUT_PASSER)
 			{
-System.out.print("Ici n°" + this.getUserId() + " : Je reçois un message : ");
 				if(this.destinationCourante != null && this.destinationCourante.getUserId() == frame.getSender())
-				{// Je n'écoute que le feu vers lequel je me dirige. S'il est à portée sur une rue pas loin ou derrière moi, nafout'
-System.out.println("Il vient de ma destination courante("+this.destinationCourante.getUserId()+"), sa voie libre est " + msg.getVoieLibre());					
-					
+				{// Je n'écoute que le feu vers lequel je me dirige. S'il est à portée sur une rue pas loin ou derrière moi, nafout'						
 					if (msg.getVoieLibre() != this.dernierCroisementParcouru.getUserId())// Si je ne suis pas sur la voie qui est au vert
-					{
-System.out.println(this.getUserId() + " : Je m'interdis de bouger");
 						this.peutBouger = false; // Interdire le déplacement
-					}
-						
-					else
-					{
-System.out.println(this.getUserId() + " : Je peux désormais bouger");
-						this.peutBouger = true;//FIXME autorise le mouvement concernant le feu rouge, mais ne devrait pas l'autoriser dans tous les cas (ex : si quelqu'un est juste devant). Il est en tout cas faux de dire "Maintenant on a le droit de bouger, c'est sûr". (=> avoir plusieurs booléens ? Au minimum changer le nom de celui-ci)
-					}
+					
+					else  // je suis sur la voie au vert
+						// Récupérer la référence vers le Croisement qui a envoyé le message et appeler gererCirculation pour mon cas
+						((Croisement) this.getMAS().getSimulatedObject(new ObjectSystemIdentifier(msg.getSender())).getObject()).gererCirculation(this);
 						
 				}				
 			}

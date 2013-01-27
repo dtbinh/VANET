@@ -20,6 +20,11 @@ public class Croisement extends Agent implements ObjectAbleToSendMessageInterfac
 	 */
 	private FeuDeSignalisation feu;
 	
+	/**
+	 * Référence vers la voiture qui est actuellement en train de traverser le Croisement (une seule à la fois)
+	 */
+	private Voiture voitureCourante;
+	
 	private final String DIRE_QUI_PEUT_PASSER = "DIRE_QUI_PEUT_PASSER";
 	/**
 	 * Constructeur par défaut appelé lors de la création du croisement (la création est gérée par MASH)
@@ -35,6 +40,7 @@ public class Croisement extends Agent implements ObjectAbleToSendMessageInterfac
 	public Croisement (MAS mas, Integer id, Float energy,Integer range){
 		super(mas, id, range);
 
+		this.voitureCourante = null;
 		this.feu = new FeuDeSignalisation();
 	}	
 	
@@ -91,6 +97,36 @@ public class Croisement extends Agent implements ObjectAbleToSendMessageInterfac
 	 */
 	public void ajouterVoieSensUnique(Croisement croisementDest) {
 		this.ajouterCroisementAdjacent(croisementDest);
+	}
+	
+	/**
+	 * Traite le cas d'une voiture au croisement : lui interdit de traverser le croisement s'il y a déjà quelqu'un dessus,
+	 * et lui donne la priorité sinon. Le synchronized est ici très important, peu importe le nombre de voitures qui demandent à ce qu'on
+	 * s'occupe d'elles (= appellent cette méthode), on les traitera une par une (pas de conflit sur la valeur de voitureCourante).
+	 * @param voiture la Voiture qui veut passer sur le Croisement
+	 */
+	public synchronized void gererCirculation(Voiture voiture) {
+		if (this.voitureCourante != null && this.voitureCourante.getUserId() != voiture.getUserId()) // Si quelqu'un d'autre que "moi" (voiture) est déjà sur le carrefour
+			voiture.setPeutBouger(false);
+		
+		else // il n'y a personne (ou alors j'étais déjà prioritaire, tant pis pour l'optimisation (on ré-écrit deux fois les mêmes choses))
+		{
+			this.voitureCourante = voiture;
+			voiture.setPeutBouger(true);
+		}	
+	}
+	
+	/**
+	 * permet de modéliser le départ de la voiture qui était sur le Croisement
+	 * Remet voitureCourante à null, en vérifiant toutefois que la voiture qui cherche à dire "je suis plus là, considère qu'il n'y a plus personne"
+	 * est bien celle qui se trouvait sur le Croisement (ce qui devrait toujours être le cas, hmm ?)
+	 * @param idVoitureAuDepart l'id de la voiture
+	 */
+	public synchronized void quitterCroisement(int idVoitureAuDepart) {
+		if (idVoitureAuDepart == this.voitureCourante.getUserId())
+			this.voitureCourante = null;
+		else
+			System.out.println("ERREUR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Ici Croisement n°" + this.getUserId() + ", la voiture n°" + idVoitureAuDepart + "prétend me quitter, mais la voiture prioritaire était " + this.voitureCourante.getUserId() + "!!!!");
 	}
 	
 	/**
