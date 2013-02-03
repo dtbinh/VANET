@@ -48,11 +48,27 @@ public class AgentsVANETFrame extends Frame
 		ByteBuffer buffer = ByteBuffer.wrap(this.getData());
 		byte type= buffer.get();
 
-		if (type == AgentsVANETMessage.DIRE_QUI_PEUT_PASSER) 
-			return new AgentsVANETMessage(buffer.getInt(), buffer.getInt(), type, buffer.getInt());
-
+		if (type == AgentsVANETMessage.DIRE_QUI_PEUT_PASSER){
+			AgentsVANETMessage nouvMsg = new AgentsVANETMessage(buffer.getInt(), buffer.getInt(), type);
+		 	nouvMsg.setVoieLibre(buffer.getInt());
+		 	return nouvMsg;
+		}
+		else if (type == AgentsVANETMessage.DIFFUSION_TRAJET){
+			AgentsVANETMessage nouvMsg = new AgentsVANETMessage(buffer.getInt(), buffer.getInt(), type);
+			nouvMsg.setCapaciteMessage(buffer.getInt());
+			
+			int i;
+			for (i=0; i <AgentsVANETMessage.TTL_OPTIMAL;i++){
+				if (i<AgentsVANETMessage.TTL_OPTIMAL-nouvMsg.getCapaciteMessage())
+					nouvMsg.parcoursMessage[i] = buffer.getInt();
+				else
+				{nouvMsg.parcoursMessage[i] = -1;}
+			}
+		}			
+		else{
 		System.out.println("Error in the encapsulation of the frame data");
-		return null;		
+		return null;
+		}
 	}
 }
 

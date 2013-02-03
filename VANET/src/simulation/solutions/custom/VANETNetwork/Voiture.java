@@ -58,6 +58,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	 * Temporaire : la liste des croisements à emprunter dans cet ordre, pour atteindre une destination
 	 * Plus tard, les voitures ne seront plus aussi omniscientes
 	 * TODO Enlever attribut et javadoc une fois devenus inutiles
+	 * FIXME: Il faut garder cet attribut ! (Je le sens dans la force).
 	 */
 	private List<Croisement> cheminASuivre;
 	/// NOTE : La commande pour récupérer un Croisement à partir de son id :
@@ -114,7 +115,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 				e.printStackTrace();
 			}
 			
-			if (this.destinationCourante != null) 
+			if (this.destinationCourante != null)
 			{// Si il reste des destinations à atteindre
 				if (this.peutBouger)
 				{
@@ -134,7 +135,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 							else{this.destinationCourante = null;}
 					}
 				}				
-			}
+			}			
 		}
 	}
 	
@@ -227,6 +228,14 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 		this.modePatrouille=nouvMode;
 	}
 	
+	
+	/**
+	 * Accesseur en lecture du croisement final
+	 */
+	
+	public int getDestination(){
+		return this.cheminASuivre.get(this.cheminASuivre.lastIndexOf(cheminASuivre)).getUserId();
+	}
 	/**
 	 * Accesseur en lecture du taux de rafraichissement
 	 * @return
@@ -254,10 +263,15 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 		return this.view;
 	}
 	
+	@SuppressWarnings("null")
 	public synchronized void receivedFrame(Frame frame){
+		//Si le message m'est bien destiné
 		if((frame.getReceiver()==Frame.BROADCAST) || (frame.getReceiver()==this.getUserId()) )
-		{
-			AgentsVANETMessage msg = (AgentsVANETMessage) frame.getMessage();			
+		{	
+			//Alors extraction des données dans un objet message
+			AgentsVANETMessage msg = (AgentsVANETMessage) frame.getMessage();
+			
+			//Si le message correspond à un message envoyé par un feude signalisation
 			if(msg.getTypeMessage()==AgentsVANETMessage.DIRE_QUI_PEUT_PASSER)
 			{
 				if(this.destinationCourante != null && this.destinationCourante.getUserId() == frame.getSender())
@@ -267,11 +281,36 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 					
 					else  // je suis sur la voie au vert
 						// Récupérer la référence vers le Croisement qui a envoyé le message et appeler gererCirculation pour mon cas
-						((Croisement) this.getMAS().getSimulatedObject(new ObjectSystemIdentifier(msg.getSender())).getObject()).gererCirculation(this);
-						
+						((Croisement) this.getMAS().getSimulatedObject(new ObjectSystemIdentifier(msg.getSender())).getObject()).gererCirculation(this);						
 				}				
 			}
-			//else if un autre genre de message intéressant
+			//Si le message est un message permettant de tisser un trajet
+			else if (msg.getTypeMessage()==AgentsVANETMessage.DIFFUSION_TRAJET){
+			//On check si la destination du vehicule est comprise dedans
+				@SuppressWarnings("unused")
+				boolean res=false;
+				//TODO : à finir
+				for (int i =0; i < AgentsVANETMessage.TTL_OPTIMAL; i++){
+					//Si elle est comprise dedans alors on peut modifier l'attribut trajet de la voiture...
+					if (msg.parcoursMessage[i]==this.getDestination()){
+						//... En créant un nouveau parcours
+						List<Croisement> nouvCheminASuivre = null;
+						for (i=AgentsVANETMessage.TTL_OPTIMAL; i >=msg.getCapaciteMessage(); i--){		
+							if (msg.parcoursMessage[i] != -1){
+								
+								Croisement c = (Croisement) this.getMAS().getSimulatedObject(new ObjectSystemIdentifier(msg.parcoursMessage[i])).getObject();
+								nouvCheminASuivre.add(c);
+							}
+						}
+						res=true;
+						break;		
+					}
+			
+				}
+				//TODO: solve the problem -vvvvvvvvvvv -> uninitalized variable.
+				//this.cheminASuivre=nouvCheminASuivre;
+			}
+			//else if un autre genre de message intéressants
 			//et dans tous les autres types de message, on les ignore (pas de else)
 		}
 	}
@@ -281,8 +320,5 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	{	// TODO Auto-generated method stub
 		
 	}
-	
-	
-	
 }
 
