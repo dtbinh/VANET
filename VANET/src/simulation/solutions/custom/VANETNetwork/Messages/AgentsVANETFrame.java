@@ -53,9 +53,11 @@ public class AgentsVANETFrame extends Frame
 		 	nouvMsg.setVoieLibre(buffer.getInt());
 		 	return nouvMsg;
 		}
+		
 		else if (type == AgentsVANETMessage.DIFFUSION_TRAJET){
 			AgentsVANETMessage nouvMsg = new AgentsVANETMessage(buffer.getInt(), buffer.getInt(), type);
 			nouvMsg.setCapaciteMessage(buffer.getInt());
+			nouvMsg.setTTLMessage(buffer.getInt());
 			
 			int i;
 			for (i=0; i <AgentsVANETMessage.TTL_OPTIMAL;i++){
@@ -64,11 +66,13 @@ public class AgentsVANETFrame extends Frame
 				else
 				{nouvMsg.parcoursMessage[i] = -1;}
 			}
+			return nouvMsg;
 		}			
 		else{
 		System.out.println("Error in the encapsulation of the frame data");
 		return null;
 		}
+		
 	}
 }
 
