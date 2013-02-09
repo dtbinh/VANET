@@ -5,6 +5,7 @@ import simulation.messages.Frame;
 import simulation.messages.ObjectAbleToSendMessageInterface;
 import simulation.multiagentSystem.MAS;
 import simulation.multiagentSystem.ObjectSystemIdentifier;
+import simulation.solutions.custom.VANETNetwork.Messages.AgentsVANETFrame;
 import simulation.solutions.custom.VANETNetwork.Messages.AgentsVANETMessage;
 import simulation.views.entity.imageInputBased.ImageFileBasedObjectView;
 
@@ -12,13 +13,14 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+//TODO en règle générale, vérifier que, lorsqu'on change quelque chose, le commentaire lié ne devrait pas lui aussi subir une modification. La doc et même les simples commentaires doivent rester à jour.
+
 
 /**
  * Classe publique correspondant aux voitures & à leur comportement
  * 
  * Attention: Les méthodes implémentées autres que run() doivent être non-bloquantes
  * @author Wyvern
- *
  */
 public class Voiture extends Agent implements ObjectAbleToSendMessageInterface 
 {	
@@ -28,6 +30,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	 */
 	private final static String SPRITE_FILENAME ="VANET.Ressources\\Sprites\\carViewUp.bmp";
 	
+	private final String DIFFUSION_TRAJET = "DIFFUSION_TRAJET";
 	/**
 	 * Attribut permettant l'affichage d'une vue personnalisée via un sprite.
 	 */
@@ -50,7 +53,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	/**
 	 * Indique d'où vient la voiture. Utile pour savoir "sur quelle voie" (entre ça et le prochain croisement) elle se trouve actuellement
 	 * Très important, car tant qu'une voiture possède dernierCroisementParcouru à null, c'est comme si elle n'était nulle part (<=> sur aucune voie, car 
-	 * elle serait considérée comme étant positionnée entre destinationCourante et null
+	 * elle serait considérée comme étant positionnée entre destinationCourante et null)
 	 */
 	private Croisement dernierCroisementParcouru;
 	
@@ -65,11 +68,9 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	 * FIXME: Il faut garder cet attribut ! (Je le sens dans la force).
 	 */
 	private List<Croisement> parcoursPrefere;
-	//TODO: faire deux attributs identiques parcours secondaire et tertiaire;
+	//TODO: faire deux attributs identiques parcours secondaire et tertiaire; / ou un tableau, voire une liste ?
 	
-	/// NOTE : La commande pour récupérer un Croisement à partir de son id :
-	// Croisement direction =(Croisement) this.getMAS().getSimulatedObject(new ObjectSystemIdentifier(idCroisement)).getObject();
-	
+
 	private Croisement destinationCourante;
 	/**
 	 * Constructeur par défaut appelé lors de la création de la voiture (la création est gérée par MASH)
@@ -122,6 +123,8 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 			
 			if (this.destinationCourante != null)
 			{// Si il reste des destinations à atteindre
+				this.sendMessage(Frame.BROADCAST, DIFFUSION_TRAJET); //FIXME Est-ce que du coup, on envoie pas ces messages un peu trop souvent ? Risque de lag inutile ?
+				
 				if (this.peutBouger)
 				{
 					allerVers(this.destinationCourante);
@@ -135,7 +138,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 						else
 							if(this.modePatrouille)
 							{ 
-								// Il faut trouver un moyen de récupérer la liste inverse ou de repartir du début							
+								// Il faut trouver un moyen de repartir du début							
 							}
 							else{this.destinationCourante = null;}
 					}
@@ -151,7 +154,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	 * @param 
 	 */
 	public void ajouterEtape(int idCroisement) {
-		Croisement c =(Croisement) this.getMAS().getSimulatedObject(new ObjectSystemIdentifier(idCroisement)).getObject();
+		Croisement c = idToCroisement(idCroisement);
 		if (this.parcoursPrefere.isEmpty())
 			this.parcoursPrefere.add(c);
 		else
@@ -191,10 +194,11 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 		
 	}
 
+	/**
+	 * Méthode redéfinie et appelée automatiquement lorsque la voiture reçoit une frame.
+	 * Devrait logiquement plutôt s'appeler onReceivedFrame
+	 */
 	public synchronized void receivedFrame(Frame frame){
-		
-		
-		
 		//Si la frame m'est bien destinée
 		if((frame.getReceiver()==Frame.BROADCAST) || (frame.getReceiver()==this.getUserId()) )
 		{				
@@ -210,86 +214,131 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 					
 					else  // je suis sur la voie au vert
 						// Récupérer la référence vers le Croisement qui a envoyé le message et appeler gererCirculation pour mon cas
-						((Croisement) this.getMAS().getSimulatedObject(new ObjectSystemIdentifier(msg.getSender())).getObject()).gererCirculation(this);						
+						idToCroisement(msg.getSender()).gererCirculation(this);
+												
 				}				
 			}
-			//Si le message est un message permettant de tisser un trajet
-			else if (msg.getTypeMessage()==AgentsVANETMessage.DIFFUSION_TRAJET){
-				//Si je suis en position pour rajouter légitimement un croisement dans le parcours du message
-				if (this.concerneeParLeChainage(msg)){
-					Iterator<Croisement> iteratorParcours = msg.parcoursMessage.iterator(); 
-					//Si la destination comprise dedans alors on peut modifier l'attribut trajet de la voiture ssi le parcours est plus rapide...
+			else if (msg.getTypeMessage()==AgentsVANETMessage.DIFFUSION_TRAJET){ //Si le message est un message permettant de tisser un trajet
+				if (this.concerneeParLeChainage(msg)){ //Si je suis en position pour rajouter légitimement un croisement dans le parcours du message
+					List<Croisement> listeCroisement = idListToCroisementList(msg.parcoursMessage);
+					Iterator<Croisement> iteratorParcours = listeCroisement.iterator(); 			
 					Croisement temp = iteratorParcours.next();
 					int nbCroisements = 0;
-					while (iteratorParcours.hasNext()){
+					
+					//Si la destination est comprise dans le message alors on peut modifier l'attribut trajet de la voiture ssi le parcours est plus rapide...
+					while (iteratorParcours.hasNext()){ 
 						temp = iteratorParcours.next();
 						nbCroisements++;
-						if (temp.equals(this.destinationFinale) && nbCroisements < this.getNbEtapesParcoursCourant()) //TODO : et que le parcours est différent (optimisation)
+						if (shorterWayToDestinationFinale(temp, nbCroisements)) //TODO à rajouter dans la fonction : et que le parcours est différent (optimisation)
 						{// si j'ai trouvé ma destination finale dans la liste et que le chemin à parcourir pour l'atteindre est plus court que ce que j'avais prévu, je considére ce nouveau trajet comme celui à emprunter
-							List<Croisement> nouvParcours = new LinkedList<Croisement>();
-							iteratorParcours = msg.parcoursMessage.iterator();
-							Croisement croisCour = iteratorParcours.next();
-							while (! croisCour.equals(this.destinationFinale)){
-								// je recopie le trajet à emprunter jusqu'à ma destination finale
-								nouvParcours.add(croisCour);
-								croisCour = iteratorParcours.next();
-							}
-							this.parcoursPrefere = nouvParcours;
+							this.actualiserParcoursCourant(msg);
 							break;
 						}
+					}
+					
+					// Re-transmission du message
+					if (msg.getTTLMessage() > 0)
+					{
+						AgentsVANETMessage msgToForward = new AgentsVANETMessage(this.getUserId(), Frame.BROADCAST, AgentsVANETMessage.DIFFUSION_TRAJET);
+						msgToForward.initTrajetMessage(msg, this.dernierCroisementParcouru);
+						this.sendFrame(new AgentsVANETFrame(this.getUserId(), Frame.BROADCAST, msgToForward));// On envoie la frame directement, sans passer par this.sendMessage (auquel cas on se serait fait bien chier pour rien)
 					}
 				}		
 			}
 			//else if un autre genre de message intéressant
-			//et dans tous les autres types de message, on les ignore (pas de else)
+			//et tous les autres types de message, on les ignore (pas de else)
 			}
 		}
-
 	
 	
 	@Override
-	public void sendMessage(int receiver, String message) {	// TODO Auto-generated method stub
+	public void sendMessage(int receiver, String message) {	
+		if (message.equals(DIFFUSION_TRAJET))
+		{
+			AgentsVANETMessage nouvMsgDiffusionTrajet = new AgentsVANETMessage(this.getUserId(), Frame.BROADCAST, AgentsVANETMessage.DIFFUSION_TRAJET);
+			nouvMsgDiffusionTrajet.parcoursMessage.add(this.destinationCourante.getUserId());// TODO : ne devrait-on pas aussi envoyer un 2ème message, qui lui contiendrait {dernierCroisementParcouru, destinationCourante} ? faire un dessin pour mieux comprendre les bienfaits/inutilités
+			this.sendFrame(new AgentsVANETFrame(this.getUserId(), Frame.BROADCAST, nouvMsgDiffusionTrajet));
+		}
+			
 	}
 	
+	/**
+	 * Appelée depuis les scénarios, cette méthode permettra d'initialiser la plupart des attributs de la Voiture. Il sera toutefois nécessaire de faire des ajouterEtape() 
+	 * après cela.
+	 */
+	public void initVoiture(int idDernierCroisementParcouru, int idDestinationFinale, boolean modePatrouille) {
+		this.setDernierCroisementParcouru(idDernierCroisementParcouru);
+		this.setDestinationFinale(idDestinationFinale);
+		this.setModePatrouille(modePatrouille);
+	}
+	
+	
+	/**
+	 * Renvoie la liste de Croisement correspondant aux id de la liste d'entiers donnée
+	 * @param intList la liste des id
+	 * @return la liste de Croisement
+	 */
+	private List<Croisement>idListToCroisementList(List<Integer> intList) {
+		Iterator<Integer> iteratorInt = intList.iterator();
+		List<Croisement> res = new LinkedList<Croisement>();
+		while (iteratorInt.hasNext())
+			res.add(idToCroisement(iteratorInt.next()));
+		return res;
+	}
+	
+	/**
+	 * Renvoie le Croisement possédant l'id donné
+	 * @param id
+	 * @return le Croisement (marcherait probablement aussi pour les autres agents)
+	 */
+	private Croisement idToCroisement(int id) {
+		return (Croisement) this.getMAS().getSimulatedObject(new ObjectSystemIdentifier(id)).getObject();
+	}
+	/**
+	 * Remplace this.parcoursPrefere par un autre itinéraire plus intéressant
+	 * @param msgParcours le message contenant le nouveau parcours. Il est nécessaire d'avoir vérifié au préalable qu'il contient effectivement un meilleur parcours
+	 * (entre autres, qu'il conduit bien jusqu'à la destination voulue...)
+	 */
+	private void actualiserParcoursCourant(AgentsVANETMessage msgParcours){
+		List<Croisement> nouvParcours = new LinkedList<Croisement>();
+		Iterator<Integer> iteratorParcours = msgParcours.parcoursMessage.iterator();
+		Croisement croisCour = idToCroisement(iteratorParcours.next());
+		while (! croisCour.equals(this.destinationFinale)){
+			// je recopie le trajet à emprunter jusqu'à ma destination finale
+			nouvParcours.add(croisCour);
+			croisCour = idToCroisement(iteratorParcours.next());
+		}
+		this.parcoursPrefere = nouvParcours;
+	}
+	
+	/**
+	 * Renvoie vrai si le parcours qu'on est en train de tester conduit bien jusqu'à la destination voulue et qu'il est plus court que le parcours courant
+	 * @param finDuParcours Le Croisement considéré comme le dernier du parcours actuellement testé
+	 * @param nbCroisementsNouvParcours le nombre de croisements nécessité pour arriver jusqu'à finDuParcours
+	 * @return
+	 */
+	private boolean shorterWayToDestinationFinale(Croisement finDuParcours, int nbCroisementsNouvParcours) {
+		return finDuParcours.equals(this.destinationFinale) && nbCroisementsNouvParcours < this.getNbEtapesParcoursCourant();
+	}
+	
+	//TODO : classer l'ordre des méthodes (ex : constructeurs/public/private/getters/setters), et sous-classer par type de return
 
 	/**
-	 * Cette fonction prends en paramètre un msg, dans lequel on va rajouter un croisement pour construire le parcours inverse du message
-	 *  /!\ Le boolean renvoyé indique si le message est fiable si il ne l'est pas alors il ne faut pas ré-emettre ce message car inutilisable /!\
-	 *  On peut utiliser des itérateurs ou liste histoire d'alléger le code.
-	 *  Il faut avoir vérifié préalablement que le message ait en attribut en derniere position de la liste des croisement parcourus la destination 
-	 *  courante de la voiture;  
+	 * Évite, entre autres, qu'une voiture géographiquement proche mais qui n'a aucun rapport en ce qui concerne les rues, traite le DIFFUSION_TRAJET reçu.
+	 * @param msg le Message contenant le trajet à (éventuellement) compléter
+	 * @return renvoie vrai si le 1er élément de la liste du message est égal à ma destination courante, çad si je suis susceptible de rajouter une étape au
+	 * trajet reçu. TODO on pourrait aussi compléter le trajet si JE VIENS de ce point, non ?
 	 */
-	// TODO : dropper des exceptions plutôt qu'un bool
-	private void insererInformationTrajet(AgentsVANETMessage msg) 
-	{
-		//TODO: verifier si la première condition est utile après l'implémentation dans le receiveFrame();
-		// Si il y a de la place pour mettre un croisement supplémentaire
-		if(	(msg.getTypeMessage()==AgentsVANETMessage.DIFFUSION_TRAJET) 
-			&&
-			((msg.getCapaciteMessage()) > 0)){				
-			//On peut rajouter un nouveau croisement
-			msg.parcoursMessage.add(this.dernierCroisementParcouru);	
-		}
-		else
-			System.out.println("Erreur format de message incorrect ou ");
-	}
-	
 	private boolean concerneeParLeChainage(AgentsVANETMessage msg)
 	{
 		boolean res = false; 
-		Croisement temp;
-		Iterator<Croisement>iteratorDestination = msg.parcoursMessage.iterator();
-		if (!iteratorDestination.hasNext()){
+
+		Iterator<Integer>iteratorMessage = msg.parcoursMessage.iterator();
+		if (iteratorMessage.hasNext())
+			res = idToCroisement(iteratorMessage.next()).equals(this.destinationCourante);
+		else 		
 			//TODO: A remplacer par un jet d'exception
-			System.out.println("La liste n'a pas été initialisée dans le message recu");
-		}
-		else {			
-			temp = iteratorDestination.next();
-			while (iteratorDestination.hasNext())
-				temp = iteratorDestination.next();
-			if (temp.equals(this.destinationCourante))
-				res=  true;
-		}		
+			System.out.println("ERREUR : on a reçu un message de diffusion de trajet vide (aucune étape). typeMessage=" + msg.getTypeMessage()+" (cf constantes)");
 		return res;
 	}
 	
@@ -297,7 +346,6 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	/**
 	 * Accesseur en lecture du mode patrouille
 	 */
-	
 	public boolean getModePatrouille() {
 		return this.modePatrouille;
 	}
@@ -323,23 +371,20 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	 * A utiliser impérativement depuis les scénarios (lors de la création de la voiture) lorsqu'on les utilise.
 	 * @param idCroisement doit absolument être adjacent à l'éventuel premier Croisement de cheminASuivre. Aucun vérification n'est faite
 	 */
-	public void setDernierCroisementParcouru(int idCroisement) {
-		this.dernierCroisementParcouru = (Croisement) this.getMAS().getSimulatedObject(new ObjectSystemIdentifier(idCroisement)).getObject();
+	private void setDernierCroisementParcouru(int idCroisement) {
+		this.dernierCroisementParcouru = idToCroisement(idCroisement);
 	}
 		
-	public void setDestinationFinale( Croisement nouvDest){
-		this.destinationFinale=nouvDest;
+	private void setDestinationFinale( int idNouvDest){
+		this.destinationFinale=idToCroisement(idNouvDest);
 	}	
+	
 	/**
 	 * Accesseur en écriture de l'attribut mode patrouile
-	 *  
 	 */
-	
-	public void setModePatrouille(boolean nouvMode)
-	{
+	private void setModePatrouille(boolean nouvMode)	{//TODO : si on met ModePatrouille à vrai, vérifier au préalable que le point d'arrivée et de départ sont ADJACENTS (=> pas le même), car on ne fera pas de demi-tour, mais une boucle
 		this.modePatrouille=nouvMode;
 	}
-	
 	
 	/**
 	 * Accesseur en lecture du croisement final
@@ -373,7 +418,8 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	}
 	
 	/**
-	 * @return
+	 * Renvoie le nombre d'éléments de la liste this.parcoursPrefere
+	 * @return le nombre d'étapes (et non pas le nombre de mouvements à faire, car le 1er est compté)
 	 */
 	private int getNbEtapesParcoursCourant() {
 		Iterator<Croisement> nouvParcours = this.parcoursPrefere.iterator();

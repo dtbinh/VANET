@@ -41,7 +41,7 @@ public class AgentsVANETFrame extends Frame
 	
 	/**
 	 * Méthode extrayant les données de l'attribut message dans un ordre précis puisque celui-ci a été formaté.
-	 * @return Message un objet message
+	 * @return l'objet Message construit à partir des données contenues dans cette Frame
 	 */
 	public Message getMessage() //throws InvalidFrameException ?
 	{
@@ -56,21 +56,18 @@ public class AgentsVANETFrame extends Frame
 		
 		else if (type == AgentsVANETMessage.DIFFUSION_TRAJET){
 			AgentsVANETMessage nouvMsg = new AgentsVANETMessage(buffer.getInt(), buffer.getInt(), type);
-			nouvMsg.setCapaciteMessage(buffer.getInt());
 			nouvMsg.setTTLMessage(buffer.getInt());
 			
-			int i;
-			for (i=0; i <AgentsVANETMessage.TTL_OPTIMAL;i++){
-				if (i<AgentsVANETMessage.TTL_OPTIMAL-nouvMsg.getCapaciteMessage())
-					nouvMsg.parcoursMessage[i] = buffer.getInt();
-				else
-				{nouvMsg.parcoursMessage[i] = -1;}
+			int nbEtapesARajouterAuMessage = buffer.getInt();
+			while (nbEtapesARajouterAuMessage > 0) {
+				nouvMsg.parcoursMessage.add(buffer.getInt()); 
+				nbEtapesARajouterAuMessage--;
 			}
 			return nouvMsg;
 		}			
 		else{
-		System.out.println("Error in the encapsulation of the frame data");
-		return null;
+			System.out.println("Error in the encapsulation of the frame data");
+			return null;
 		}
 		
 	}

@@ -78,7 +78,12 @@ public class Croisement extends Agent implements ObjectAbleToSendMessageInterfac
 	@Override
 	public void sendMessage(int receiver, String message) {
 		if (message.equals(DIRE_QUI_PEUT_PASSER))
-			this.sendFrame(new AgentsVANETFrame(getUserId(), receiver, new AgentsVANETMessage(getUserId(),receiver, AgentsVANETMessage.DIRE_QUI_PEUT_PASSER,this.feu.getVoieLibre().getUserId())));
+		{
+			AgentsVANETMessage msg = new AgentsVANETMessage(getUserId(),receiver, AgentsVANETMessage.DIRE_QUI_PEUT_PASSER);
+			msg.setVoieLibre(this.feu.getVoieLibre().getUserId());
+			this.sendFrame(new AgentsVANETFrame(getUserId(), receiver, msg));
+		}
+			
 		//else if je cherche à envoyer un message de type T...
 	}
 	
@@ -87,7 +92,7 @@ public class Croisement extends Agent implements ObjectAbleToSendMessageInterfac
 	 * @param idAutreCroisement ...C'est pas assez clair ?
 	 */
 	public void relierCroisements(int idAutreCroisement){
-		Croisement autreCroisement = (Croisement) this.getMAS().getSimulatedObject(new ObjectSystemIdentifier(idAutreCroisement)).getObject();
+		Croisement autreCroisement = idToCroisement(idAutreCroisement);
 		this.ajouterCroisementAdjacent(autreCroisement);
 		autreCroisement.ajouterCroisementAdjacent(this);
 	}
@@ -99,6 +104,14 @@ public class Croisement extends Agent implements ObjectAbleToSendMessageInterfac
 		this.ajouterCroisementAdjacent(croisementDest);
 	}
 	
+	/**
+	 * Renvoie le Croisement possédant l'id donné
+	 * @param id
+	 * @return le Croisement (marcherait probablement aussi pour les autres agents)
+	 */
+	private Croisement idToCroisement(int id) {
+		return (Croisement) this.getMAS().getSimulatedObject(new ObjectSystemIdentifier(id)).getObject();
+	}
 	/**
 	 * Traite le cas d'une voiture au croisement : lui interdit de traverser le croisement s'il y a déjà quelqu'un dessus,
 	 * et lui donne la priorité sinon. Le synchronized est ici très important, peu importe le nombre de voitures qui demandent à ce qu'on
@@ -117,7 +130,7 @@ public class Croisement extends Agent implements ObjectAbleToSendMessageInterfac
 	}
 	
 	/**
-	 * permet de modéliser le départ de la voiture qui était sur le Croisement
+	 * Permet de modéliser le départ de la voiture qui était sur le Croisement
 	 * Remet voitureCourante à null, en vérifiant toutefois que la voiture qui cherche à dire "je suis plus là, considère qu'il n'y a plus personne"
 	 * est bien celle qui se trouvait sur le Croisement (ce qui devrait toujours être le cas, hmm ?)
 	 * @param idVoitureAuDepart l'id de la voiture
@@ -130,7 +143,7 @@ public class Croisement extends Agent implements ObjectAbleToSendMessageInterfac
 	}
 	
 	/**
-	 * renvoie vrai si le croisement "possède une voie" pour aller jusqu'à c
+	 * Renvoie vrai si le croisement "possède une voie" pour aller jusqu'à c
 	 * @param c le croisement peut-être adjacent
 	 * @return le booléen ne tient pas compte d'éventuelles voies à sens unique
 	 */
