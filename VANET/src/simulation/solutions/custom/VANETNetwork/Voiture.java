@@ -14,7 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 //TODO en règle générale, vérifier que, lorsqu'on change quelque chose, le commentaire lié ne devrait pas lui aussi subir une modification. La doc et même les simples commentaires doivent rester à jour.
-
+//TODO Si ça marche pas, checker les FIXME et TODO, il y a peut-être une explication au bug à laquelle on avait déjà pensé...
 
 /**
  * Classe publique correspondant aux voitures & à leur comportement
@@ -47,7 +47,8 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	private boolean peutBouger;
 	
 	/**
-	 * Attribut indiquant si le vehicule pattrouille
+	 * Attribut indiquant si le vehicule patrouille
+	 * TODO reste à définir plus précisément le comportement d'un véhicule en patrouille. (ex : j'atteinds ma destination, je fais quoi ? je retourne au point de départ qui se trouve à coté (il faudrait donc le retenir) ? mais à ce moment, pour retourner à la destination, je n'ai qu'une rue à prendre ! le mode patrouille ne semble adapté qu'au fonctionnement "je connais déjà le parcours à faire". à supprimer, éventuellement)
 	 */
 	private boolean modePatrouille;
 	/**
@@ -61,11 +62,18 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	 * Attribut correspondant à la destination de la voiture. 
 	 */
 	 private Croisement destinationFinale;
+	 
+	 /**
+	  * Représente l'étape qu'il faudra (a priori) atteindre une fois destinationCourante atteinte.
+	  * Utilisée quand je n'ai pas de parcours défini ; il s'agit de la direction que nous donne le Croisement sur le point d'être rejoint (direction aléatoire)
+	  * "Tu voudrais aller à croisementB ? Connais pas, essaie vers le Sud après m'avoir dépassé. Et t'avise pas de griller mon feu rouge !".
+	  */
+	 private Croisement etapeDApres;
 	/**
-	 * Temporaire : la liste des croisements à emprunter dans cet ordre, pour atteindre une destination
-	 * Plus tard, les voitures ne seront plus aussi omniscientes
-	 * TODO Enlever attribut et javadoc une fois devenus inutiles
-	 * FIXME: Il faut garder cet attribut ! (Je le sens dans la force).
+	 * La liste des croisements à emprunter dans cet ordre, pour atteindre destinationFinale, qui DOIT se trouver en dernière position si on a trouvé un itinéraire valable
+	 * Il s'agit de l'itinéraire que l'on suppose le meilleur pour l'instant. Ne contient pas dernierCroisementParcouru comme 1er élément.
+	 * /!\ Si aucun parcours n'a été determiné, la liste est initialisée à vide, et non pas à null /!\
+	 * FIXME faut-il supprimer au fur et a mesure qu'on avance ?
 	 */
 	private List<Croisement> parcoursPrefere;
 	//TODO: faire deux attributs identiques parcours secondaire et tertiaire; / ou un tableau, voire une liste ?
@@ -89,6 +97,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 		this.parcoursPrefere = new LinkedList<Croisement>();
 		this.destinationCourante = null;
 		this.modePatrouille = false;
+		this.etapeDApres = null;
 		try{
 			this.view = new ImageFileBasedObjectView(SPRITE_FILENAME);
 			System.out.println("Image Voiture chargée");
@@ -133,14 +142,24 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 					{// Si on est arrivé à la destination courante
 						this.dernierCroisementParcouru = this.destinationCourante;
 						this.destinationCourante.quitterCroisement(this.getUserId());// On considère ne plus être sur le croisement, les autres peuvent passer		
-						if (iteratorDestinations.hasNext())
-							this.destinationCourante = iteratorDestinations.next();
+						
+						if (this.parcoursPrefere.size() > 0)
+						{
+							if (iteratorDestinations.hasNext())
+								this.destinationCourante = iteratorDestinations.next();
+							else
+								if(this.modePatrouille)
+								{ 
+									// Il faut trouver un moyen de repartir du début							
+								}
+								else
+									this.destinationCourante = null;
+						}
 						else
-							if(this.modePatrouille)
-							{ 
-								// Il faut trouver un moyen de repartir du début							
-							}
-							else{this.destinationCourante = null;}
+						{
+							this.destinationCourante = this.etapeDApres; // Si aucun parcours n'a été défini, on suppose que la voiture aura obtenu une direction en "discutant" avec le Croisement vers lequel elle se dirigeait
+							this.etapeDApres = null;
+						}
 					}
 				}				
 			}			
@@ -191,7 +210,6 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 			
 			this.setPosition(this.getPosition().x + deltaX, this.getPosition().y + deltaY);
 		}
-		
 	}
 
 	/**
@@ -211,11 +229,9 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 				{// Je n'écoute que le feu vers lequel je me dirige. S'il est à portée sur une rue pas loin ou derrière moi, nafout'						
 					if (msg.getVoieLibre() != this.dernierCroisementParcouru.getUserId())// Si je ne suis pas sur la voie qui est au vert
 						this.peutBouger = false; // Interdire le déplacement
-					
 					else  // je suis sur la voie au vert
 						// Récupérer la référence vers le Croisement qui a envoyé le message et appeler gererCirculation pour mon cas
-						idToCroisement(msg.getSender()).gererCirculation(this);
-												
+						idToCroisement(msg.getSender()).gererCirculation(this);				
 				}				
 			}
 			else if (msg.getTypeMessage()==AgentsVANETMessage.DIFFUSION_TRAJET){ //Si le message est un message permettant de tisser un trajet
@@ -245,6 +261,10 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 					}
 				}		
 			}
+			else if (msg.getTypeMessage() == AgentsVANETMessage.INDIQUER_DIRECTION) { // message permettant de choisir la prochaine direction en fonction des "panneaux" du Croisement à venir 
+				if (this.parcoursPrefere.isEmpty() && this.etapeDApres == null)// on peut ignorer le message si on a déjà un itinéraire complet ou si on connait déjà quelle sera la prochaine destination
+					idToCroisement(msg.getSender()).indiquerDirectionAPrendre(this);
+			}
 			//else if un autre genre de message intéressant
 			//et tous les autres types de message, on les ignore (pas de else)
 			}
@@ -259,14 +279,13 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 			nouvMsgDiffusionTrajet.parcoursMessage.add(this.destinationCourante.getUserId());// TODO : ne devrait-on pas aussi envoyer un 2ème message, qui lui contiendrait {dernierCroisementParcouru, destinationCourante} ? faire un dessin pour mieux comprendre les bienfaits/inutilités
 			this.sendFrame(new AgentsVANETFrame(this.getUserId(), Frame.BROADCAST, nouvMsgDiffusionTrajet));
 		}
-			
 	}
 	
 	/**
-	 * Appelée depuis les scénarios, cette méthode permettra d'initialiser la plupart des attributs de la Voiture. Il sera toutefois nécessaire de faire des ajouterEtape() 
-	 * après cela.
+	 * Appelée depuis les scénarios, cette méthode permettra d'initialiser la plupart des attributs de la Voiture.
 	 */
 	public void initVoiture(int idDernierCroisementParcouru, int idDestinationFinale, boolean modePatrouille) {
+		//FIXME et la première étape ? c'est ici qu'on la donne non ?
 		this.setDernierCroisementParcouru(idDernierCroisementParcouru);
 		this.setDestinationFinale(idDestinationFinale);
 		this.setModePatrouille(modePatrouille);
@@ -327,7 +346,8 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	 * Évite, entre autres, qu'une voiture géographiquement proche mais qui n'a aucun rapport en ce qui concerne les rues, traite le DIFFUSION_TRAJET reçu.
 	 * @param msg le Message contenant le trajet à (éventuellement) compléter
 	 * @return renvoie vrai si le 1er élément de la liste du message est égal à ma destination courante, çad si je suis susceptible de rajouter une étape au
-	 * trajet reçu. TODO on pourrait aussi compléter le trajet si JE VIENS de ce point, non ?
+	 * trajet reçu. 
+	 * TODO on pourrait aussi compléter le trajet si JE VIENS de ce point, non ? Ne pas implémenter avant que toute l'équipe soit d'accord
 	 */
 	private boolean concerneeParLeChainage(AgentsVANETMessage msg)
 	{
@@ -367,9 +387,8 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 		if (nouvTaux > 0){this.TAUX_RAFRAICHISSEMENT=nouvTaux;}
 	}
 	/**
-	 * /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ 
-	 * A utiliser impérativement depuis les scénarios (lors de la création de la voiture) lorsqu'on les utilise.
-	 * @param idCroisement doit absolument être adjacent à l'éventuel premier Croisement de cheminASuivre. Aucun vérification n'est faite
+	 * setter de dernierCroisementParcouru via l'id
+	 * @param idCroisement Pas de vérification. On vous fait confiance, pas d'absurdité, hein ?
 	 */
 	private void setDernierCroisementParcouru(int idCroisement) {
 		this.dernierCroisementParcouru = idToCroisement(idCroisement);
@@ -405,6 +424,18 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	public Croisement getDestinationFinale(){
 		return this.destinationFinale;
 	}
+	
+	public List<Croisement> getParcoursPrefere() {
+		return this.parcoursPrefere;
+	}
+	
+	public void setEtapeDApres(Croisement c) {
+		this.etapeDApres = c;
+	}
+	
+	public Croisement getDernierCroisementParcouru() {
+		return this.dernierCroisementParcouru;
+	}
 	/**
 	 * Fonction calculant la distance entre deux agents en récupérant les coordonnées de l'agent passé en paramètre
 	 * @param agent l'agent cible
@@ -418,17 +449,11 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	}
 	
 	/**
-	 * Renvoie le nombre d'éléments de la liste this.parcoursPrefere
-	 * @return le nombre d'étapes (et non pas le nombre de mouvements à faire, car le 1er est compté)
+	 * Renvoie le nombre d'éléments de la liste this.parcoursPrefere. Utile pour les idiots comme moi qui n'avaient pas remarqué l'existence de .size()
+	 * @return le nombre de mouvements à faire, car le 1er n'est pas compté
 	 */
-	private int getNbEtapesParcoursCourant() {
-		Iterator<Croisement> nouvParcours = this.parcoursPrefere.iterator();
-		int nbCroisement=0;
-		while (nouvParcours.hasNext()){
-			nbCroisement++;
-			nouvParcours.next();
-		}
-		return nbCroisement;
+	private int getNbEtapesParcoursCourant() {//FIXME synchronized ? ou ça risquerait au contraire de bloquer une méthode synchronized qui appellerait celle-ci ? et puis zut, faites pas *****, utilisez .size()
+		return this.parcoursPrefere.size();
 	}
 	/**
 	 * Accesseur en lecture de la vue (sprite, caractère ascii, etc..) celle-ci s'affiche dans l'environnement MASH.

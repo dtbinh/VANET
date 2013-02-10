@@ -130,6 +130,24 @@ public class Croisement extends Agent implements ObjectAbleToSendMessageInterfac
 	}
 	
 	/**
+	 * Met à jour les données de la voiture appelante afin de lui dire où aller
+	 * Si sa destinationFinale est adjacente, on lui indique le chemin (une étape, c'est pas long, et c'est à coup sûr !)
+	 * sinon, on lui indique une direction au hasard parmi ce qui reste (pas de demi-tour)
+	 * @param voiture la Voiture qui a besoin d'indications
+	 */
+	public void indiquerDirectionAPrendre(Voiture voiture) {
+		if (this.feu.contient(voiture.getDestinationFinale()))
+			// on suppose parcoursPrefere vide, car sinon voiture n'aurait pas demandé son chemin
+			voiture.getParcoursPrefere().add(voiture.getDestinationFinale());
+		else
+			voiture.setEtapeDApres(this.directionAleatoireAutreQue(voiture.getDernierCroisementParcouru()));
+	}
+	
+	private Croisement directionAleatoireAutreQue(Croisement croisementANePasRenvoyer) {
+		return this.feu.directionAleatoireAutreQue(croisementANePasRenvoyer);
+	}
+	
+	/**
 	 * Permet de modéliser le départ de la voiture qui était sur le Croisement
 	 * Remet voitureCourante à null, en vérifiant toutefois que la voiture qui cherche à dire "je suis plus là, considère qu'il n'y a plus personne"
 	 * est bien celle qui se trouvait sur le Croisement (ce qui devrait toujours être le cas, hmm ?)

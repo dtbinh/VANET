@@ -105,6 +105,13 @@ public class FeuDeSignalisation{
 		return this.directionsPossibles.contains(c);
 	}
 	
+	
+	public Croisement directionAleatoireAutreQue(Croisement croisementANePasRenvoyer) { 
+		Croisement res = this.directionsPossibles.get((int) Math.random() * this.directionsPossibles.size());
+		while (res.equals(croisementANePasRenvoyer))
+			res = this.directionsPossibles.get((int) Math.random() * this.directionsPossibles.size());
+		return res;
+	}
 	/**
 	 * Ajoute une direction en plus
 	 * @param directionPossible

@@ -21,6 +21,7 @@ public class AgentsVANETMessage extends Message{
 	
 	/**
 	 * Pour certains messages, ni la position de l'envoyeur ni celle du receveur n'importent. 
+	 * FIXME Posons carrément la question, est-ce que parfois, ON S'EN SERT ? On fait du VANET, quand même. Je ne vois qu'un seul endroit où on se sert des Positions, c'est lors du déplacement. Faut non plus tout recopier bêtement de PreyPredator.
 	 */
 	private IntegerPosition positionAgent;	
 	
@@ -33,9 +34,9 @@ public class AgentsVANETMessage extends Message{
 	private int TTLMessage;
 	//TODO : bien séparer les attributs qui ne sont utilisés que pour un type de message des autres
 	
-	//Flemme de faire les accesseurs d'où -> public TODO: Quand j'ai le temps optimiser ce foutu code
+	//Flemme de faire les accesseurs d'où -> public TODO: Quand j'ai le temps optimiser ce foutu code (par exemple, faire des sous-classes de messageVANET qui héritent, et qui seront les seules à posséder leurs atributs particuliers)
 	/**
-	 * Liste des id des croisements du parcours
+	 * Liste des id des croisements du parcours. Utilisé par DIFFUSION_TRAJET.
 	 */
 	public List<Integer>parcoursMessage;
 	
@@ -50,6 +51,7 @@ public class AgentsVANETMessage extends Message{
 	 */
 	
 	//On référence tous les identifiants des agents	
+	//FIXME ... et on s'en sert quand de ces trucs là ?
 	public static final int VOITURE=0;
 	public static final int FEU_DE_SIGNALISATION=1;
 	public static final int CROISEMENT=2;
@@ -69,6 +71,7 @@ public class AgentsVANETMessage extends Message{
 	public static final byte ECHANGE_DE_POSITION=1;//FIXME FIXED trouver mieux que ce nom tout pourri : Non je le trouve cool ! / RE : échange de quelles positions ? un croisement et une voiture ? je suppose que c'est plutôt 2 voitures, auquel cas la voiture de devant ne voit pas sa place "échangée" avec l'autre, i.e 5 mètres derrière... personne ne recule dans un dépassement... si c'est pas un dépassement, ben je vois pas à quoi sert ce message. MEILLEUR NOM, B*RDEL !
 	public static final byte DIRE_QUI_PEUT_PASSER=2;
 	public static final byte DIFFUSION_TRAJET=3;
+	public static final byte INDIQUER_DIRECTION=4;// sert principalement à obtenir une référence vers le croisement indicateur au moment opportun, afin de pouvoir décider où aller ensuite
 	
 	/**
 	 * Nombre de sauts qu'un message est autorisé à faire à sa création. Constante utilisée par les types de message qui se relaient (ex : DIFFUSION_TRAJET)
@@ -153,6 +156,7 @@ public class AgentsVANETMessage extends Message{
 	 * Fonction extrêmement importante, elle code en tableau de byte les attributs de l'objet message en vue d'une expédition.
 	 * 
 	 * NOTE: L'ordre est important et va induire un décodage lors de l'extraction des informations dans cet ordre précis
+	 * On mettra toujours en premier le type de message afin de faciliter le décodage
 	 * @return le message sous forme de byte[]
 	 */
 	public byte[] toByteSequence()
@@ -168,10 +172,13 @@ public class AgentsVANETMessage extends Message{
 			
 			res.putInt(this.parcoursMessage.size());
 			while (iteratorParcours.hasNext())
-				res.putInt(iteratorParcours.next());//TODO peut poser problème de ne pas faire les putInt sur la même ligne que le allocate ?
+				res.putInt(iteratorParcours.next());//FIXME peut poser problème de ne pas faire les putInt sur la même ligne que le allocate ?
 			
 			return res.array();
 		}
+		else if (this.typeMessage==INDIQUER_DIRECTION) 
+			return ByteBuffer.allocate(50).put(this.typeMessage).putInt(this.senderID).putInt(receiverID).array();
+		
 		//else if == ...
 		else
 		{

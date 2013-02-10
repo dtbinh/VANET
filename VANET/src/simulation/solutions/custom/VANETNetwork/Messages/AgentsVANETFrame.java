@@ -45,17 +45,17 @@ public class AgentsVANETFrame extends Frame
 	 */
 	public Message getMessage() //throws InvalidFrameException ?
 	{
+		AgentsVANETMessage nouvMsg = null;
 		ByteBuffer buffer = ByteBuffer.wrap(this.getData());
 		byte type= buffer.get();
 
 		if (type == AgentsVANETMessage.DIRE_QUI_PEUT_PASSER){
-			AgentsVANETMessage nouvMsg = new AgentsVANETMessage(buffer.getInt(), buffer.getInt(), type);
+			nouvMsg = new AgentsVANETMessage(buffer.getInt(), buffer.getInt(), type);
 		 	nouvMsg.setVoieLibre(buffer.getInt());
-		 	return nouvMsg;
 		}
 		
 		else if (type == AgentsVANETMessage.DIFFUSION_TRAJET){
-			AgentsVANETMessage nouvMsg = new AgentsVANETMessage(buffer.getInt(), buffer.getInt(), type);
+			nouvMsg = new AgentsVANETMessage(buffer.getInt(), buffer.getInt(), type);
 			nouvMsg.setTTLMessage(buffer.getInt());
 			
 			int nbEtapesARajouterAuMessage = buffer.getInt();
@@ -63,13 +63,14 @@ public class AgentsVANETFrame extends Frame
 				nouvMsg.parcoursMessage.add(buffer.getInt()); 
 				nbEtapesARajouterAuMessage--;
 			}
-			return nouvMsg;
-		}			
-		else{
-			System.out.println("Error in the encapsulation of the frame data");
-			return null;
+		}		
+		else if (type == AgentsVANETMessage.INDIQUER_DIRECTION) {
+			nouvMsg = new AgentsVANETMessage(buffer.getInt(), buffer.getInt(), type);
 		}
+		else
+			System.out.println("Error in the encapsulation of the frame data");
 		
+		return nouvMsg;
 	}
 }
 
