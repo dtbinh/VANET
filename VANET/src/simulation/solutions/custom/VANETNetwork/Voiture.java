@@ -28,7 +28,14 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	/**
 	 * Référencement des ressources, via le chemin relatif
 	 */
-	private final static String SPRITE_FILENAME ="VANET.Ressources\\Sprites\\carViewUp.bmp";
+	private final static String SPRITE_FILENAME_UP ="VANET.Ressources\\Sprites\\carViewUp.bmp";
+	private final static String SPRITE_FILENAME_UP_RIGHT ="VANET.Ressources\\Sprites\\carViewUpRight.bmp";
+	private final static String SPRITE_FILENAME_RIGHT ="VANET.Ressources\\Sprites\\carViewRight.bmp";
+	private final static String SPRITE_FILENAME_DOWN_RIGHT ="VANET.Ressources\\Sprites\\carViewDownRight.bmp";
+	private final static String SPRITE_FILENAME_DOWN ="VANET.Ressources\\Sprites\\carViewDown.bmp";
+	private final static String SPRITE_FILENAME_DOWN_LEFT ="VANET.Ressources\\Sprites\\carViewDownLeft.bmp";
+	private final static String SPRITE_FILENAME_LEFT ="VANET.Ressources\\Sprites\\carViewLeft.bmp";	
+	private final static String SPRITE_FILENAME_UP_LEFT ="VANET.Ressources\\Sprites\\carViewUpLeft.bmp";
 	
 	private final String DIFFUSION_TRAJET = "DIFFUSION_TRAJET";
 	/**
@@ -98,13 +105,8 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 		this.destinationCourante = null;
 		this.modePatrouille = false;
 		this.etapeDApres = null;
-		try{
-			this.view = new ImageFileBasedObjectView(SPRITE_FILENAME);
-			System.out.println("Image Voiture chargée");
-		}
-		catch(Exception e){
-			System.out.println("Impossible de charger le fichier " + Voiture.SPRITE_FILENAME);
-		}
+		this.setView(SPRITE_FILENAME_UP);
+		
 	}	
  
 	/**
@@ -186,7 +188,13 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 		}
 	}
 	
-
+	public void setView( String sprite_filename){
+		try {this.view = new ImageFileBasedObjectView(sprite_filename);}
+		catch (Exception e){
+			System.out.println("Impossible de charger le fichier " + this.view.toString());
+		}
+	}
+	
 	/**
 	 * Fonction permettant de faire "un pas" vers la destination. 
 	 * @param l'agent destination
@@ -209,6 +217,34 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 				deltaY = -1;
 			
 			this.setPosition(this.getPosition().x + deltaX, this.getPosition().y + deltaY);
+			// Rafraichissement du Sprite de la voiture en fonction de l'orientation de celle-ci
+						switch (deltaX){
+							case 1: 
+								switch (deltaY){
+									case 1 :
+										this.setView(SPRITE_FILENAME_UP_RIGHT);				
+									case 0 :
+										this.setView(SPRITE_FILENAME_RIGHT);
+									case -1 :
+										this.setView(SPRITE_FILENAME_DOWN_RIGHT);				
+								}
+							case 0: 
+								switch (deltaY){
+								case 1 :
+									this.setView(SPRITE_FILENAME_UP);
+								case -1 :
+									this.setView(SPRITE_FILENAME_DOWN);			
+								}				
+							case -1: 
+								switch (deltaY){
+									case 1 :
+										this.setView(SPRITE_FILENAME_UP_LEFT);				
+									case 0 :
+										this.setView(SPRITE_FILENAME_LEFT);					
+									case -1 :
+										this.setView(SPRITE_FILENAME_DOWN_LEFT);			
+								}
+						}	
 		}
 	}
 
