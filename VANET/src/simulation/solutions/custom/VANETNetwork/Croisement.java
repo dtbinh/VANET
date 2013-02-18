@@ -26,6 +26,8 @@ public class Croisement extends Agent implements ObjectAbleToSendMessageInterfac
 	private Voiture voitureCourante;
 	
 	private final String DIRE_QUI_PEUT_PASSER = "DIRE_QUI_PEUT_PASSER";
+	private final String INDIQUER_DIRECTION = "INDIQUER_DIRECTION";
+	
 	/**
 	 * Constructeur par défaut appelé lors de la création du croisement (la création est gérée par MASH)
 	 * Il faut considérer les paramètres comme invariants quoiqu'il arrive (tout comme le super constructeur et ses paramètres)
@@ -72,6 +74,7 @@ public class Croisement extends Agent implements ObjectAbleToSendMessageInterfac
 		while (true){
 			try{Thread.sleep(100);}catch(Exception e){}		
 			this.sendMessage(Frame.BROADCAST, DIRE_QUI_PEUT_PASSER);
+			this.sendMessage(Frame.BROADCAST, INDIQUER_DIRECTION);
 		}
 		
 	}
@@ -83,7 +86,9 @@ public class Croisement extends Agent implements ObjectAbleToSendMessageInterfac
 			msg.setVoieLibre(this.feu.getVoieLibre().getUserId());
 			this.sendFrame(new AgentsVANETFrame(getUserId(), receiver, msg));
 		}
-			
+		else if (message.equals(INDIQUER_DIRECTION))
+			this.sendFrame(new AgentsVANETFrame(getUserId(), receiver, new AgentsVANETMessage(getUserId(),receiver, AgentsVANETMessage.INDIQUER_DIRECTION)));
+		
 		//else if je cherche à envoyer un message de type T...
 	}
 	
@@ -137,8 +142,8 @@ public class Croisement extends Agent implements ObjectAbleToSendMessageInterfac
 	 */
 	public void indiquerDirectionAPrendre(Voiture voiture) {
 		if (this.feu.contient(voiture.getDestinationFinale()))
-			// on suppose parcoursPrefere vide, car sinon voiture n'aurait pas demandé son chemin
-			voiture.getParcoursPrefere().add(voiture.getDestinationFinale());
+			// on remplace l'ancien éventuel parcours par "vazy c'est juste là"
+			voiture.actualiserParcoursCourant(voiture.getDestinationFinale());
 		else
 			voiture.setEtapeDApres(this.directionAleatoireAutreQue(voiture.getDernierCroisementParcouru()));
 	}

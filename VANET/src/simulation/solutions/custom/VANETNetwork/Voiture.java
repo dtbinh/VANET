@@ -46,7 +46,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	/**
 	 * En gros, la vitesse du véhicule. /!\ Une valeur élevée indique un véhicule lent
 	 */
-	private int TAUX_RAFRAICHISSEMENT =70; 
+	private int TAUX_RAFRAICHISSEMENT =20; 
 	
 	/**
 	 * Booléen indiquant si la voiture a le droit de se déplacer. (Par exemple, permet d'attendre à un feu rouge)
@@ -85,7 +85,11 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	private List<Croisement> parcoursPrefere;
 	//TODO: faire deux attributs identiques parcours secondaire et tertiaire; / ou un tableau, voire une liste ?
 	
-
+	/**
+	 * Iterator sur parcoursPrefere
+	 */
+	Iterator<Croisement> iteratorDestinations;
+	
 	private Croisement destinationCourante;
 	/**
 	 * Constructeur par défaut appelé lors de la création de la voiture (la création est gérée par MASH)
@@ -102,6 +106,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 		this.peutBouger = true;
 		this.dernierCroisementParcouru = null;
 		this.parcoursPrefere = new LinkedList<Croisement>();
+		this.iteratorDestinations = this.parcoursPrefere.iterator();
 		this.destinationCourante = null;
 		this.modePatrouille = false;
 		this.etapeDApres = null;
@@ -118,13 +123,10 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 		// wait a little amount of time to allow the construction of others agents
 		try{Thread.sleep(500);}catch(Exception e){}		
 		
-		Iterator<Croisement> iteratorDestinations = this.parcoursPrefere.iterator();
+		this.iteratorDestinations = this.parcoursPrefere.iterator();
+		//FIXME le problème vient de l'iterator : si on modifie parcoursPrefere lors par exemple d'un receivedFrame, l'iterator n'est pas mis à jour, semble-t-il. Que faire ? 
 
-		
-		if (iteratorDestinations.hasNext()) // On initialise la 1ère destination. Si la liste était vide, destinationCourante reste à null
-			this.destinationCourante = iteratorDestinations.next();
-		
-		while(!isKilling() && !isStopping()) // TODO && destinationCourante != null ??? afin de diparaitre une fois la destination atteinte
+		while(!isKilling() && !isStopping()) // TODO && destinationCourante != null ??? afin de diparaitre une fois la destination atteinte. A discuter
 		{
 			try {
 				Thread.sleep(this.TAUX_RAFRAICHISSEMENT);
@@ -147,8 +149,8 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 						
 						if (this.parcoursPrefere.size() > 0)
 						{
-							if (iteratorDestinations.hasNext())
-								this.destinationCourante = iteratorDestinations.next();
+							if (this.iteratorDestinations.hasNext())
+								this.destinationCourante = this.iteratorDestinations.next();
 							else
 								if(this.modePatrouille)
 								{ 
@@ -172,6 +174,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	 * Ajoute en fin de liste (cheminASuivre) le croisement donné, à condition qu'il soit relié au 
 	 * dernier croisement courant de la liste, et affiche un message d'erreur sinon
 	 * Principalement destiné aux scénarii
+	 * FIXME à supprimer quand inutile
 	 * @param 
 	 */
 	public void ajouterEtape(int idCroisement) {
@@ -218,33 +221,33 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 			
 			this.setPosition(this.getPosition().x + deltaX, this.getPosition().y + deltaY);
 			// Rafraichissement du Sprite de la voiture en fonction de l'orientation de celle-ci
-						switch (deltaX){
-							case 1: 
-								switch (deltaY){
-									case 1 :
-										this.setView(SPRITE_FILENAME_UP_RIGHT);				
-									case 0 :
-										this.setView(SPRITE_FILENAME_RIGHT);
-									case -1 :
-										this.setView(SPRITE_FILENAME_DOWN_RIGHT);				
-								}
-							case 0: 
-								switch (deltaY){
-								case 1 :
-									this.setView(SPRITE_FILENAME_UP);
-								case -1 :
-									this.setView(SPRITE_FILENAME_DOWN);			
-								}				
-							case -1: 
-								switch (deltaY){
-									case 1 :
-										this.setView(SPRITE_FILENAME_UP_LEFT);				
-									case 0 :
-										this.setView(SPRITE_FILENAME_LEFT);					
-									case -1 :
-										this.setView(SPRITE_FILENAME_DOWN_LEFT);			
-								}
-						}	
+		/*	switch (deltaX){
+				case 1: 
+					switch (deltaY){
+						case 1 :
+							this.setView(SPRITE_FILENAME_UP_RIGHT);				
+						case 0 :
+							this.setView(SPRITE_FILENAME_RIGHT);
+						case -1 :
+							this.setView(SPRITE_FILENAME_DOWN_RIGHT);				
+					}
+				case 0: 
+					switch (deltaY){
+					case 1 :
+						this.setView(SPRITE_FILENAME_UP);
+					case -1 :
+						this.setView(SPRITE_FILENAME_DOWN);			
+					}				
+				case -1: 
+					switch (deltaY){
+						case 1 :
+							this.setView(SPRITE_FILENAME_UP_LEFT);				
+						case 0 :
+							this.setView(SPRITE_FILENAME_LEFT);					
+						case -1 :
+							this.setView(SPRITE_FILENAME_DOWN_LEFT);			
+					}
+			}*/	
 		}
 	}
 
@@ -271,6 +274,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 				}				
 			}
 			else if (msg.getTypeMessage()==AgentsVANETMessage.DIFFUSION_TRAJET){ //Si le message est un message permettant de tisser un trajet
+System.out.println("MESSAGE DE DIFFUSION TRAJET RECU");//FIXME
 				if (this.concerneeParLeChainage(msg)){ //Si je suis en position pour rajouter légitimement un croisement dans le parcours du message
 					List<Croisement> listeCroisement = idListToCroisementList(msg.parcoursMessage);
 					Iterator<Croisement> iteratorParcours = listeCroisement.iterator(); 			
@@ -281,7 +285,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 					while (iteratorParcours.hasNext()){ 
 						temp = iteratorParcours.next();
 						nbCroisements++;
-						if (shorterWayToDestinationFinale(temp, nbCroisements)) //TODO à rajouter dans la fonction : et que le parcours est différent (optimisation)
+						if (shorterWayToDestinationFinale(temp, nbCroisements)) //TODO et que le parcours est différent (optimisation)
 						{// si j'ai trouvé ma destination finale dans la liste et que le chemin à parcourir pour l'atteindre est plus court que ce que j'avais prévu, je considére ce nouveau trajet comme celui à emprunter
 							this.actualiserParcoursCourant(msg);
 							break;
@@ -298,8 +302,11 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 				}		
 			}
 			else if (msg.getTypeMessage() == AgentsVANETMessage.INDIQUER_DIRECTION) { // message permettant de choisir la prochaine direction en fonction des "panneaux" du Croisement à venir 
-				if (this.parcoursPrefere.isEmpty() && this.etapeDApres == null)// on peut ignorer le message si on a déjà un itinéraire complet ou si on connait déjà quelle sera la prochaine destination
-					idToCroisement(msg.getSender()).indiquerDirectionAPrendre(this);
+				if (this.destinationCourante != null && this.destinationCourante.getUserId() == frame.getSender())// on n'écoute que le croisement vers lequel on se dirige
+					{
+						if (this.parcoursPrefere.isEmpty() && this.etapeDApres == null)// on peut ignorer le message si on a déjà un itinéraire complet ou si on connait déjà quelle sera la prochaine destination
+							idToCroisement(msg.getSender()).indiquerDirectionAPrendre(this);
+					}
 			}
 			//else if un autre genre de message intéressant
 			//et tous les autres types de message, on les ignore (pas de else)
@@ -320,11 +327,11 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	/**
 	 * Appelée depuis les scénarios, cette méthode permettra d'initialiser la plupart des attributs de la Voiture.
 	 */
-	public void initVoiture(int idDernierCroisementParcouru, int idDestinationFinale, boolean modePatrouille) {
-		//FIXME et la première étape ? c'est ici qu'on la donne non ?
+	public void initVoiture(int idDernierCroisementParcouru, int prochaineDestination, int idDestinationFinale, int modePatrouille) {
 		this.setDernierCroisementParcouru(idDernierCroisementParcouru);
+		this.setDestinationCourante(prochaineDestination);
 		this.setDestinationFinale(idDestinationFinale);
-		this.setModePatrouille(modePatrouille);
+		this.setModePatrouille(intToBool(modePatrouille));
 	}
 	
 	
@@ -363,7 +370,29 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 			nouvParcours.add(croisCour);
 			croisCour = idToCroisement(iteratorParcours.next());
 		}
-		this.parcoursPrefere = nouvParcours;
+		remplacerParcoursPrefere(nouvParcours);
+	}
+	
+	/**
+	 * Comme l'homonyme, mais avec un seul Croisement. Utile pour, par exemple, un Croisement qui veut indiquer que le chemin pour destinationFinale est
+	 * à un saut, et qui donc en fait un chemin "officiel".
+	 * Remplace this.parcoursPrefere par un autre itinéraire constitué d'un seul Croisement. On suppose donc qu'il mène directement à destinationFinale
+	 * @param c
+	 */
+	public void actualiserParcoursCourant(Croisement c) {
+		List<Croisement> listUnItem = new LinkedList<Croisement>();
+		listUnItem.add(c);
+		remplacerParcoursPrefere(listUnItem);
+	}
+	
+	/**
+	 * Remplace parcoursPrefere par la liste donnée en paramètre.
+	 * DOIT ETRE appelée par les méthodes qui veulent changer parcoursPrefere, car remplacerParcoursPrefere met également à jour l'itérateur.
+	 * @param nouveauParcours la liste des Croisement à emprunter jusqu'à destinationFinale. Aucune vérification n'est faite.
+	 */
+	private void remplacerParcoursPrefere(List<Croisement> nouveauParcours) {
+		this.parcoursPrefere = nouveauParcours;
+		this.iteratorDestinations = this.parcoursPrefere.iterator();
 	}
 	
 	/**
@@ -434,6 +463,18 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 		this.destinationFinale=idToCroisement(idNouvDest);
 	}	
 	
+	private void setDestinationCourante(int idDestCourante) {
+		this.destinationCourante = idToCroisement(idDestCourante);
+	}
+	/**
+	 * Renvoie l'équivalent booléen de x (comme en C)
+	 * @param x
+	 * @return
+	 */
+	private boolean intToBool(int x) {
+		return x != 0;
+	}
+	
 	/**
 	 * Accesseur en écriture de l'attribut mode patrouile
 	 */
@@ -460,10 +501,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	public Croisement getDestinationFinale(){
 		return this.destinationFinale;
 	}
-	
-	public List<Croisement> getParcoursPrefere() {
-		return this.parcoursPrefere;
-	}
+
 	
 	public void setEtapeDApres(Croisement c) {
 		this.etapeDApres = c;

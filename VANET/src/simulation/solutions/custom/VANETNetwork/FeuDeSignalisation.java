@@ -2,6 +2,7 @@ package simulation.solutions.custom.VANETNetwork;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 
 /**
@@ -107,9 +108,13 @@ public class FeuDeSignalisation{
 	
 	
 	public Croisement directionAleatoireAutreQue(Croisement croisementANePasRenvoyer) { 
-		Croisement res = this.directionsPossibles.get((int) Math.random() * this.directionsPossibles.size());
+		Random r = new Random();
+
+		Croisement res = this.directionsPossibles.get(r.nextInt(this.directionsPossibles.size()));
 		while (res.equals(croisementANePasRenvoyer))
-			res = this.directionsPossibles.get((int) Math.random() * this.directionsPossibles.size());
+			res = this.directionsPossibles.get(r.nextInt(this.directionsPossibles.size()));
+		
+System.out.println("DIRECTION AU HASARD CHOISIE : " + res);//FIXME
 		return res;
 	}
 	/**
