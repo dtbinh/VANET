@@ -113,8 +113,6 @@ public class FeuDeSignalisation{
 		Croisement res = this.directionsPossibles.get(r.nextInt(this.directionsPossibles.size()));
 		while (res.equals(croisementANePasRenvoyer))
 			res = this.directionsPossibles.get(r.nextInt(this.directionsPossibles.size()));
-		
-System.out.println("DIRECTION AU HASARD CHOISIE : " + res);//FIXME
 		return res;
 	}
 	/**

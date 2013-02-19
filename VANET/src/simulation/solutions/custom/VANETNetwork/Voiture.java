@@ -29,14 +29,15 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	 * Référencement des ressources, via le chemin relatif
 	 */
 	private final static String SPRITE_FILENAME_UP ="VANET.Ressources\\Sprites\\carViewUp.bmp";
-	private final static String SPRITE_FILENAME_UP_RIGHT ="VANET.Ressources\\Sprites\\carViewUpRight.bmp";
+/*	TODO gérer l'orientation des sprites, ou virer ces lignes si c'est vraiment impossible
+    private final static String SPRITE_FILENAME_UP_RIGHT ="VANET.Ressources\\Sprites\\carViewUpRight.bmp";
 	private final static String SPRITE_FILENAME_RIGHT ="VANET.Ressources\\Sprites\\carViewRight.bmp";
 	private final static String SPRITE_FILENAME_DOWN_RIGHT ="VANET.Ressources\\Sprites\\carViewDownRight.bmp";
 	private final static String SPRITE_FILENAME_DOWN ="VANET.Ressources\\Sprites\\carViewDown.bmp";
 	private final static String SPRITE_FILENAME_DOWN_LEFT ="VANET.Ressources\\Sprites\\carViewDownLeft.bmp";
 	private final static String SPRITE_FILENAME_LEFT ="VANET.Ressources\\Sprites\\carViewLeft.bmp";	
 	private final static String SPRITE_FILENAME_UP_LEFT ="VANET.Ressources\\Sprites\\carViewUpLeft.bmp";
-	
+*/
 	private final String DIFFUSION_TRAJET = "DIFFUSION_TRAJET";
 	/**
 	 * Attribut permettant l'affichage d'une vue personnalisée via un sprite.
@@ -53,11 +54,6 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	 */
 	private boolean peutBouger;
 	
-	/**
-	 * Attribut indiquant si le vehicule patrouille
-	 * TODO reste à définir plus précisément le comportement d'un véhicule en patrouille. (ex : j'atteinds ma destination, je fais quoi ? je retourne au point de départ qui se trouve à coté (il faudrait donc le retenir) ? mais à ce moment, pour retourner à la destination, je n'ai qu'une rue à prendre ! le mode patrouille ne semble adapté qu'au fonctionnement "je connais déjà le parcours à faire". à supprimer, éventuellement)
-	 */
-	private boolean modePatrouille;
 	/**
 	 * Indique d'où vient la voiture. Utile pour savoir "sur quelle voie" (entre ça et le prochain croisement) elle se trouve actuellement
 	 * Très important, car tant qu'une voiture possède dernierCroisementParcouru à null, c'est comme si elle n'était nulle part (<=> sur aucune voie, car 
@@ -80,15 +76,15 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	 * La liste des croisements à emprunter dans cet ordre, pour atteindre destinationFinale, qui DOIT se trouver en dernière position si on a trouvé un itinéraire valable
 	 * Il s'agit de l'itinéraire que l'on suppose le meilleur pour l'instant. Ne contient pas dernierCroisementParcouru comme 1er élément.
 	 * /!\ Si aucun parcours n'a été determiné, la liste est initialisée à vide, et non pas à null /!\
-	 * FIXME faut-il supprimer au fur et a mesure qu'on avance ?
+	 * FIXME faut-il supprimer au fur et a mesure qu'on avance ? à discuter
 	 */
 	private List<Croisement> parcoursPrefere;
-	//TODO: faire deux attributs identiques parcours secondaire et tertiaire; / ou un tableau, voire une liste ?
+	//TODO: faire deux attributs identiques parcours secondaire et tertiaire ? / ou un tableau, voire une liste ? Pas prioritaire
 	
 	/**
-	 * Iterator sur parcoursPrefere
+	 * Iterator sur parcoursPrefere. Attribut car il faut le réinitialiser quand parcoursPrefere est modifié
 	 */
-	Iterator<Croisement> iteratorDestinations;
+	private Iterator<Croisement> iteratorDestinations;
 	
 	private Croisement destinationCourante;
 	/**
@@ -108,10 +104,8 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 		this.parcoursPrefere = new LinkedList<Croisement>();
 		this.iteratorDestinations = this.parcoursPrefere.iterator();
 		this.destinationCourante = null;
-		this.modePatrouille = false;
 		this.etapeDApres = null;
 		this.setView(SPRITE_FILENAME_UP);
-		
 	}	
  
 	/**
@@ -126,7 +120,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 		this.iteratorDestinations = this.parcoursPrefere.iterator();
 		//FIXME le problème vient de l'iterator : si on modifie parcoursPrefere lors par exemple d'un receivedFrame, l'iterator n'est pas mis à jour, semble-t-il. Que faire ? 
 
-		while(!isKilling() && !isStopping()) // TODO && destinationCourante != null ??? afin de diparaitre une fois la destination atteinte. A discuter
+		while(!isKilling() && !isStopping() && this.destinationCourante != null) // TODO && destinationCourante != null, est-ce bien à faire ? le sprite ne semble pas disparaitre. A discuter
 		{
 			try {
 				Thread.sleep(this.TAUX_RAFRAICHISSEMENT);
@@ -152,12 +146,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 							if (this.iteratorDestinations.hasNext())
 								this.destinationCourante = this.iteratorDestinations.next();
 							else
-								if(this.modePatrouille)
-								{ 
-									// Il faut trouver un moyen de repartir du début							
-								}
-								else
-									this.destinationCourante = null;
+								this.destinationCourante = null;
 						}
 						else
 						{
@@ -257,14 +246,14 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	 */
 	public synchronized void receivedFrame(Frame frame){
 		//Si la frame m'est bien destinée
-		if((frame.getReceiver()==Frame.BROADCAST) || (frame.getReceiver()==this.getUserId()) )
+		if((frame.getReceiver()==Frame.BROADCAST || frame.getReceiver()==this.getUserId()) && this.destinationCourante != null/* On ne traite pas les messages si on est arrivé à destination */)
 		{				
 			//... alors extraction des données dans un objet message
 			AgentsVANETMessage msg = (AgentsVANETMessage) frame.getMessage();
 			
 			if(msg.getTypeMessage()==AgentsVANETMessage.DIRE_QUI_PEUT_PASSER)
 			{//Si le message correspond à un message envoyé par un feu de signalisation
-				if(this.destinationCourante != null && this.destinationCourante.getUserId() == frame.getSender())
+				if(this.destinationCourante.getUserId() == frame.getSender())
 				{// Je n'écoute que le feu vers lequel je me dirige. S'il est à portée sur une rue pas loin ou derrière moi, nafout'						
 					if (msg.getVoieLibre() != this.dernierCroisementParcouru.getUserId())// Si je ne suis pas sur la voie qui est au vert
 						this.peutBouger = false; // Interdire le déplacement
@@ -274,7 +263,6 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 				}				
 			}
 			else if (msg.getTypeMessage()==AgentsVANETMessage.DIFFUSION_TRAJET){ //Si le message est un message permettant de tisser un trajet
-System.out.println("MESSAGE DE DIFFUSION TRAJET RECU");//FIXME
 				if (this.concerneeParLeChainage(msg)){ //Si je suis en position pour rajouter légitimement un croisement dans le parcours du message
 					List<Croisement> listeCroisement = idListToCroisementList(msg.parcoursMessage);
 					Iterator<Croisement> iteratorParcours = listeCroisement.iterator(); 			
@@ -302,7 +290,7 @@ System.out.println("MESSAGE DE DIFFUSION TRAJET RECU");//FIXME
 				}		
 			}
 			else if (msg.getTypeMessage() == AgentsVANETMessage.INDIQUER_DIRECTION) { // message permettant de choisir la prochaine direction en fonction des "panneaux" du Croisement à venir 
-				if (this.destinationCourante != null && this.destinationCourante.getUserId() == frame.getSender())// on n'écoute que le croisement vers lequel on se dirige
+				if (this.destinationCourante.getUserId() == frame.getSender())// on n'écoute que le croisement vers lequel on se dirige
 					{
 						if (this.parcoursPrefere.isEmpty() && this.etapeDApres == null)// on peut ignorer le message si on a déjà un itinéraire complet ou si on connait déjà quelle sera la prochaine destination
 							idToCroisement(msg.getSender()).indiquerDirectionAPrendre(this);
@@ -327,11 +315,10 @@ System.out.println("MESSAGE DE DIFFUSION TRAJET RECU");//FIXME
 	/**
 	 * Appelée depuis les scénarios, cette méthode permettra d'initialiser la plupart des attributs de la Voiture.
 	 */
-	public void initVoiture(int idDernierCroisementParcouru, int prochaineDestination, int idDestinationFinale, int modePatrouille) {
+	public void initVoiture(int idDernierCroisementParcouru, int prochaineDestination, int idDestinationFinale) {
 		this.setDernierCroisementParcouru(idDernierCroisementParcouru);
 		this.setDestinationCourante(prochaineDestination);
 		this.setDestinationFinale(idDestinationFinale);
-		this.setModePatrouille(intToBool(modePatrouille));
 	}
 	
 	
@@ -362,6 +349,7 @@ System.out.println("MESSAGE DE DIFFUSION TRAJET RECU");//FIXME
 	 * (entre autres, qu'il conduit bien jusqu'à la destination voulue...)
 	 */
 	private void actualiserParcoursCourant(AgentsVANETMessage msgParcours){
+System.out.println("");System.out.println("Ici Voiture " + this.getUserId() + " : J'ai trouvé un (meilleur) itinéraire");//FIXME
 		List<Croisement> nouvParcours = new LinkedList<Croisement>();
 		Iterator<Integer> iteratorParcours = msgParcours.parcoursMessage.iterator();
 		Croisement croisCour = idToCroisement(iteratorParcours.next());
@@ -429,13 +417,6 @@ System.out.println("MESSAGE DE DIFFUSION TRAJET RECU");//FIXME
 	
 	
 	/**
-	 * Accesseur en lecture du mode patrouille
-	 */
-	public boolean getModePatrouille() {
-		return this.modePatrouille;
-	}
-	
-	/**
 	 * Setter de peutBouger
 	 * FIXME changer le nom de la méthode quand le nom de la variable aura changé
 	 * @param b la nouvelle valeur booléenne de l'attribut
@@ -449,7 +430,7 @@ System.out.println("MESSAGE DE DIFFUSION TRAJET RECU");//FIXME
 	 * @param nouvTaux 
 	 */
 	public void setTauxDeRafraichissement(int nouvTaux)	{		
-		if (nouvTaux > 0){this.TAUX_RAFRAICHISSEMENT=nouvTaux;}
+		if (nouvTaux > 0) this.TAUX_RAFRAICHISSEMENT=nouvTaux;
 	}
 	/**
 	 * setter de dernierCroisementParcouru via l'id
@@ -466,28 +447,7 @@ System.out.println("MESSAGE DE DIFFUSION TRAJET RECU");//FIXME
 	private void setDestinationCourante(int idDestCourante) {
 		this.destinationCourante = idToCroisement(idDestCourante);
 	}
-	/**
-	 * Renvoie l'équivalent booléen de x (comme en C)
-	 * @param x
-	 * @return
-	 */
-	private boolean intToBool(int x) {
-		return x != 0;
-	}
-	
-	/**
-	 * Accesseur en écriture de l'attribut mode patrouile
-	 */
-	private void setModePatrouille(boolean nouvMode)	{//TODO : si on met ModePatrouille à vrai, vérifier au préalable que le point d'arrivée et de départ sont ADJACENTS (=> pas le même), car on ne fera pas de demi-tour, mais une boucle
-		this.modePatrouille=nouvMode;
-	}
-	
-	/**
-	 * Accesseur en lecture du croisement final
-	 */	
-	public int getDestination(){
-		return this.parcoursPrefere.get(this.parcoursPrefere.lastIndexOf(parcoursPrefere)).getUserId();
-	}
+
 	/**
 	 * Accesseur en lecture du taux de rafraichissement
 	 * @return
