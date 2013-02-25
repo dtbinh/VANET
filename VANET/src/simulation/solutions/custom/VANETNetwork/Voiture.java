@@ -105,6 +105,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 		this.iteratorDestinations = this.parcoursPrefere.iterator();
 		this.destinationCourante = null;
 		this.etapeDApres = null;
+		this.setRange(this.getRange() * 2);
 		this.setView(SPRITE_FILENAME_UP);
 	}	
  
@@ -159,26 +160,6 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 		}
 	}
 	
-	/**
-	 * Ajoute en fin de liste (cheminASuivre) le croisement donné, à condition qu'il soit relié au 
-	 * dernier croisement courant de la liste, et affiche un message d'erreur sinon
-	 * Principalement destiné aux scénarii
-	 * FIXME à supprimer quand inutile
-	 * @param 
-	 */
-	public void ajouterEtape(int idCroisement) {
-		Croisement c = idToCroisement(idCroisement);
-		if (this.parcoursPrefere.isEmpty())
-			this.parcoursPrefere.add(c);
-		else
-		{
-			Croisement temp = this.parcoursPrefere.get(this.parcoursPrefere.size() - 1);// récupérer le dernier
-			if (c.estAdjacentA(temp))
-				this.parcoursPrefere.add(c);
-			else
-				System.out.println("Impossible d'ajouter le croisement (id=" + c.getUserId() + ") : non adjacent au dernier de la liste de la voiture (id=" + this.getUserId() + ")");
-		}
-	}
 	
 	public void setView( String sprite_filename){
 		try {this.view = new ImageFileBasedObjectView(sprite_filename);}
@@ -263,17 +244,17 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 				}				
 			}
 			else if (msg.getTypeMessage()==AgentsVANETMessage.DIFFUSION_TRAJET){ //Si le message est un message permettant de tisser un trajet
-				if (this.concerneeParLeChainage(msg)){ //Si je suis en position pour rajouter légitimement un croisement dans le parcours du message
+				if (this.concerneeParLeChainage(msg)){ //Si je suis en position pour rajouter légitimement un croisement dans le parcours du message ou m'en servir
 					List<Croisement> listeCroisement = idListToCroisementList(msg.parcoursMessage);
 					Iterator<Croisement> iteratorParcours = listeCroisement.iterator(); 			
 					Croisement temp = iteratorParcours.next();
 					int nbCroisements = 0;
 					
 					//Si la destination est comprise dans le message alors on peut modifier l'attribut trajet de la voiture ssi le parcours est plus rapide...
-					while (iteratorParcours.hasNext()){ 
+					while (iteratorParcours.hasNext()){ //FIXME doute : si on n'a qu'un seul croisement dans le message (=message n'ayant jamais été retransmis), on rentre pas dans ce while, probleme ?
 						temp = iteratorParcours.next();
 						nbCroisements++;
-						if (shorterWayToDestinationFinale(temp, nbCroisements)) //TODO et que le parcours est différent (optimisation)
+						if (shorterWayToDestinationFinale(temp, nbCroisements)) 
 						{// si j'ai trouvé ma destination finale dans la liste et que le chemin à parcourir pour l'atteindre est plus court que ce que j'avais prévu, je considére ce nouveau trajet comme celui à emprunter
 							this.actualiserParcoursCourant(msg);
 							break;
@@ -349,7 +330,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	 * (entre autres, qu'il conduit bien jusqu'à la destination voulue...)
 	 */
 	private void actualiserParcoursCourant(AgentsVANETMessage msgParcours){
-System.out.println("");System.out.println("Ici Voiture " + this.getUserId() + " : J'ai trouvé un (meilleur) itinéraire");//FIXME
+
 		List<Croisement> nouvParcours = new LinkedList<Croisement>();
 		Iterator<Integer> iteratorParcours = msgParcours.parcoursMessage.iterator();
 		Croisement croisCour = idToCroisement(iteratorParcours.next());
@@ -358,6 +339,7 @@ System.out.println("");System.out.println("Ici Voiture " + this.getUserId() + " 
 			nouvParcours.add(croisCour);
 			croisCour = idToCroisement(iteratorParcours.next());
 		}
+System.out.println("");System.out.println("/!\\Ici Voiture " + this.getUserId() + " : J'ai trouvé un (meilleur) itinéraire ("+nouvParcours.size()+" au lieu de "+this.getNbEtapesParcoursCourant()+")");//FIXME
 		remplacerParcoursPrefere(nouvParcours);
 	}
 	
@@ -385,15 +367,16 @@ System.out.println("");System.out.println("Ici Voiture " + this.getUserId() + " 
 	
 	/**
 	 * Renvoie vrai si le parcours qu'on est en train de tester conduit bien jusqu'à la destination voulue et qu'il est plus court que le parcours courant
+	 * (ou que le parcours de base était vide, évidemment, on  peut considérer qu'un parcours vide possède [infini] croisements)
 	 * @param finDuParcours Le Croisement considéré comme le dernier du parcours actuellement testé
 	 * @param nbCroisementsNouvParcours le nombre de croisements nécessité pour arriver jusqu'à finDuParcours
 	 * @return
 	 */
 	private boolean shorterWayToDestinationFinale(Croisement finDuParcours, int nbCroisementsNouvParcours) {
-		return finDuParcours.equals(this.destinationFinale) && nbCroisementsNouvParcours < this.getNbEtapesParcoursCourant();
+		return finDuParcours.equals(this.destinationFinale) && (nbCroisementsNouvParcours < this.getNbEtapesParcoursCourant() || this.getNbEtapesParcoursCourant() == 0);
 	}
 	
-	//TODO : classer l'ordre des méthodes (ex : constructeurs/public/private/getters/setters), et sous-classer par type de return
+	//TODO Pour ceux qui s'ennuient : classer l'ordre des méthodes (ex : constructeurs/public/private/getters/setters), et sous-classer par type de return
 
 	/**
 	 * Évite, entre autres, qu'une voiture géographiquement proche mais qui n'a aucun rapport en ce qui concerne les rues, traite le DIFFUSION_TRAJET reçu.
@@ -422,7 +405,7 @@ System.out.println("");System.out.println("Ici Voiture " + this.getUserId() + " 
 	 * @param b la nouvelle valeur booléenne de l'attribut
 	 */
 	public void setPeutBouger(boolean b) {
-		this.peutBouger = b;//FIXME autorise(ou pas) le mouvement concernant le feu rouge, mais ne devrait pas l'autoriser dans tous les cas (ex : si quelqu'un est juste devant). Il est en tout cas faux de dire "Maintenant on a le droit de bouger, c'est sûr". (=> avoir plusieurs booléens ? Au minimum changer le nom de celui-ci)
+		this.peutBouger = b;//FIXME ceci autorise(ou pas) le mouvement concernant le feu rouge, mais ne devrait pas l'autoriser dans tous les cas (ex : si quelqu'un est juste devant). Il est en tout cas faux de dire "Maintenant on a le droit de bouger, c'est sûr". (=> avoir plusieurs booléens ? Au minimum changer le nom de celui-ci)
 	}
 	
 	/**
@@ -448,21 +431,14 @@ System.out.println("");System.out.println("Ici Voiture " + this.getUserId() + " 
 		this.destinationCourante = idToCroisement(idDestCourante);
 	}
 
-	/**
-	 * Accesseur en lecture du taux de rafraichissement
-	 * @return
-	 */
 	public int getTauxDeRafraichissement() {
 		return this.TAUX_RAFRAICHISSEMENT;
 	}
-	/**
-	 * Accesseur en lectur de l'attribut destinationFinale
-	 */
+
 	public Croisement getDestinationFinale(){
 		return this.destinationFinale;
 	}
 
-	
 	public void setEtapeDApres(Croisement c) {
 		this.etapeDApres = c;
 	}

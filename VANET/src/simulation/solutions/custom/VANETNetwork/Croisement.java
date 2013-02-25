@@ -76,7 +76,6 @@ public class Croisement extends Agent implements ObjectAbleToSendMessageInterfac
 			this.sendMessage(Frame.BROADCAST, DIRE_QUI_PEUT_PASSER);
 			this.sendMessage(Frame.BROADCAST, INDIQUER_DIRECTION);
 		}
-		
 	}
 	@Override
 	public void sendMessage(int receiver, String message) {
@@ -162,7 +161,7 @@ public class Croisement extends Agent implements ObjectAbleToSendMessageInterfac
 		if (idVoitureAuDepart == this.voitureCourante.getUserId())
 			this.voitureCourante = null;
 		else
-			System.out.println("ERREUR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Ici Croisement n°" + this.getUserId() + ", la voiture n°" + idVoitureAuDepart + "prétend me quitter, mais la voiture prioritaire était " + this.voitureCourante.getUserId() + "!!!!");
+			System.out.println("\n"+"ERREUR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Ici Croisement n°" + this.getUserId() + ", la voiture n°" + idVoitureAuDepart + "prétend me quitter, mais la voiture prioritaire était " + this.voitureCourante.getUserId() + "!!!!");
 	}
 	
 	/**
