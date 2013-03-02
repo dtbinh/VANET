@@ -56,14 +56,12 @@ public class FeuDeSignalisation{
 	}
 	/**
 	 * Accesseur sécurisé en lecture permettant de récupérer l'attribut VoieLibre
-	 * @return un croisement
 	 */
 	public synchronized Croisement getVoieLibre() {
 		return this.voieLibre;
 	}
 	/**
-	 * Accesseur sécurisé en écriture permettant de modifier l'attribut VoieLibre
-	 * @param voie la nouvelle directions possible
+	 * Accesseur sécurisé en écriture permettant de modifier voieLibre
 	 */
 	public synchronized void setVoieLibre(Croisement voie) {
 		this.voieLibre = voie;

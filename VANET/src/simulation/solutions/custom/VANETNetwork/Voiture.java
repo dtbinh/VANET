@@ -14,7 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 //TODO en règle générale, vérifier que, lorsqu'on change quelque chose, le commentaire lié ne devrait pas lui aussi subir une modification. La doc et même les simples commentaires doivent rester à jour.
-//TODO Si ça marche pas, checker les FIXME et TODO, il y a peut-être une explication au bug à laquelle on avait déjà pensé...
+//TODO Si ça marche pas, checker les FIXME_TODO, il y a peut-être une explication au bug à laquelle on avait déjà pensé...
 
 /**
  * Classe publique correspondant aux voitures & à leur comportement
@@ -24,12 +24,20 @@ import java.util.List;
  */
 public class Voiture extends Agent implements ObjectAbleToSendMessageInterface 
 {	
-	//TODO se demander s'il n'y a pas des méthodes qui devraient être synchronized (afin qu'on ne puisse pas traiter un frame et faire certains autres trucs en même temps
+	//TODO se demander s'il n'y a pas des méthodes qui devraient être synchronized (afin qu'on ne puisse pas traiter un frame et faire certains autres trucs en même temps)
 	/**
 	 * Référencement des ressources, via le chemin relatif
 	 */
-	private final static String SPRITE_FILENAME_UP ="VANET.Ressources\\Sprites\\carViewUp.bmp";
-/*	TODO gérer l'orientation des sprites, ou virer ces lignes si c'est vraiment impossible
+	private final static String SPRITE_FILENAME_UP ="VANET.Ressources\\Sprites\\miniCar.bmp";
+    private final static String SPRITE_FILENAME_UP_RIGHT ="VANET.Ressources\\Sprites\\miniCar.bmp";
+	private final static String SPRITE_FILENAME_RIGHT ="VANET.Ressources\\Sprites\\miniCar.bmp";
+	private final static String SPRITE_FILENAME_DOWN_RIGHT ="VANET.Ressources\\Sprites\\miniCar.bmp";
+	private final static String SPRITE_FILENAME_DOWN ="VANET.Ressources\\Sprites\\miniCar.bmp";
+	private final static String SPRITE_FILENAME_DOWN_LEFT ="VANET.Ressources\\Sprites\\miniCar.bmp";
+	private final static String SPRITE_FILENAME_LEFT ="VANET.Ressources\\Sprites\\miniCar.bmp";	
+	private final static String SPRITE_FILENAME_UP_LEFT ="VANET.Ressources\\Sprites\\miniCar.bmp";
+	/*
+	 * 	private final static String SPRITE_FILENAME_UP ="VANET.Ressources\\Sprites\\carViewUp.bmp";
     private final static String SPRITE_FILENAME_UP_RIGHT ="VANET.Ressources\\Sprites\\carViewUpRight.bmp";
 	private final static String SPRITE_FILENAME_RIGHT ="VANET.Ressources\\Sprites\\carViewRight.bmp";
 	private final static String SPRITE_FILENAME_DOWN_RIGHT ="VANET.Ressources\\Sprites\\carViewDownRight.bmp";
@@ -37,17 +45,30 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	private final static String SPRITE_FILENAME_DOWN_LEFT ="VANET.Ressources\\Sprites\\carViewDownLeft.bmp";
 	private final static String SPRITE_FILENAME_LEFT ="VANET.Ressources\\Sprites\\carViewLeft.bmp";	
 	private final static String SPRITE_FILENAME_UP_LEFT ="VANET.Ressources\\Sprites\\carViewUpLeft.bmp";
-*/
+	 */
+	
+	/*
+	 * On actualisera view avec les suivantes en fonction des déplacements de la Voiture
+	 */
+	private ImageFileBasedObjectView viewUp;
+	private ImageFileBasedObjectView viewUpRight;
+	private ImageFileBasedObjectView viewRight;
+	private ImageFileBasedObjectView viewDownRight;
+	private ImageFileBasedObjectView viewDown;
+	private ImageFileBasedObjectView viewDownLeft;
+	private ImageFileBasedObjectView viewLeft;
+	private ImageFileBasedObjectView viewUpLeft;
+
 	private final String DIFFUSION_TRAJET = "DIFFUSION_TRAJET";
 	/**
-	 * Attribut permettant l'affichage d'une vue personnalisée via un sprite.
+	 * Attribut permettant l'affichage d'une vue personnalisée via un sprite. Il s'agit de l'image actuellement affichée
 	 */
 	private ImageFileBasedObjectView view;
 	
 	/**
 	 * En gros, la vitesse du véhicule. /!\ Une valeur élevée indique un véhicule lent
 	 */
-	private int TAUX_RAFRAICHISSEMENT =20; 
+	private int TAUX_RAFRAICHISSEMENT =80; 
 	
 	/**
 	 * Booléen indiquant si la voiture a le droit de se déplacer. (Par exemple, permet d'attendre à un feu rouge)
@@ -75,11 +96,11 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	/**
 	 * La liste des croisements à emprunter dans cet ordre, pour atteindre destinationFinale, qui DOIT se trouver en dernière position si on a trouvé un itinéraire valable
 	 * Il s'agit de l'itinéraire que l'on suppose le meilleur pour l'instant. Ne contient pas dernierCroisementParcouru comme 1er élément.
+	 * On supprime les étapes franchies au fur et à mesure
 	 * /!\ Si aucun parcours n'a été determiné, la liste est initialisée à vide, et non pas à null /!\
-	 * FIXME faut-il supprimer au fur et a mesure qu'on avance ? à discuter
 	 */
 	private List<Croisement> parcoursPrefere;
-	//TODO: faire deux attributs identiques parcours secondaire et tertiaire ? / ou un tableau, voire une liste ? Pas prioritaire
+	//TODO: faire deux attributs identiques parcours secondaire et tertiaire ? / ou un tableau, voire une liste ? (Pas prioritaire)
 	
 	/**
 	 * Iterator sur parcoursPrefere. Attribut car il faut le réinitialiser quand parcoursPrefere est modifié
@@ -105,8 +126,22 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 		this.iteratorDestinations = this.parcoursPrefere.iterator();
 		this.destinationCourante = null;
 		this.etapeDApres = null;
-		this.setRange(this.getRange() * 2);
-		this.setView(SPRITE_FILENAME_UP);
+		this.setRange(this.getRange() * 4);
+		
+		try {
+			this.viewUp = new ImageFileBasedObjectView(SPRITE_FILENAME_UP);
+			this.viewUpRight = new ImageFileBasedObjectView(SPRITE_FILENAME_UP_RIGHT);
+			this.viewRight = new ImageFileBasedObjectView(SPRITE_FILENAME_RIGHT);
+			this.viewDownRight = new ImageFileBasedObjectView(SPRITE_FILENAME_DOWN_RIGHT);
+			this.viewDown = new ImageFileBasedObjectView(SPRITE_FILENAME_DOWN);
+			this.viewDownLeft = new ImageFileBasedObjectView(SPRITE_FILENAME_DOWN_LEFT);
+			this.viewLeft = new ImageFileBasedObjectView(SPRITE_FILENAME_LEFT);
+			this.viewUpLeft = new ImageFileBasedObjectView(SPRITE_FILENAME_UP_LEFT);
+			this.view = this.viewUp;
+		}
+		catch (Exception e){
+			System.out.println("\nImpossible de charger un des sprites");
+		}
 	}	
  
 	/**
@@ -116,10 +151,9 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	 */
 	public void run() {
 		// wait a little amount of time to allow the construction of others agents
-		try{Thread.sleep(500);}catch(Exception e){}		
+		try{Thread.sleep(500);}catch(Exception e){e.printStackTrace();}		
 		
 		this.iteratorDestinations = this.parcoursPrefere.iterator();
-		//FIXME le problème vient de l'iterator : si on modifie parcoursPrefere lors par exemple d'un receivedFrame, l'iterator n'est pas mis à jour, semble-t-il. Que faire ? 
 
 		while(!isKilling() && !isStopping() && this.destinationCourante != null) // TODO && destinationCourante != null, est-ce bien à faire ? le sprite ne semble pas disparaitre. A discuter
 		{
@@ -128,44 +162,146 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+
+			this.sendMessage(Frame.BROADCAST, DIFFUSION_TRAJET); //FIXME Est-ce que du coup, on envoie pas ces messages un peu trop souvent (à chaque rafraichissement du sprite) ? Risque de lag inutile ?
 			
-			if (this.destinationCourante != null)
-			{// Si il reste des destinations à atteindre
-				this.sendMessage(Frame.BROADCAST, DIFFUSION_TRAJET); //FIXME Est-ce que du coup, on envoie pas ces messages un peu trop souvent ? Risque de lag inutile ?
+			if (this.peutBouger)
+			{
+				allerVers(this.destinationCourante);
 				
-				if (this.peutBouger)
-				{
-					allerVers(this.destinationCourante);
+				if (this.destinationCourante.getPosition().equal(this.getPosition()))
+				{// Si on est arrivé à la destination courante
+					this.dernierCroisementParcouru = this.destinationCourante;
+					this.destinationCourante.quitterCroisement(this.getUserId());// On considère ne plus être sur le croisement, les autres peuvent passer		
 					
-					if (this.destinationCourante.getPosition().equal(this.getPosition()))
-					{// Si on est arrivé à la destination courante
-						this.dernierCroisementParcouru = this.destinationCourante;
-						this.destinationCourante.quitterCroisement(this.getUserId());// On considère ne plus être sur le croisement, les autres peuvent passer		
+					if (this.parcoursPrefere.size() > 0)
+					{
+						this.parcoursPrefere.remove(0);//On supprime de la liste le croisement qu'on vient de dépasser (le 1er de la liste)
+						this.iteratorDestinations = this.parcoursPrefere.iterator();
 						
-						if (this.parcoursPrefere.size() > 0)
-						{
-							if (this.iteratorDestinations.hasNext())
-								this.destinationCourante = this.iteratorDestinations.next();
-							else
-								this.destinationCourante = null;
-						}
+						if (this.iteratorDestinations.hasNext())
+							this.destinationCourante = this.iteratorDestinations.next();
 						else
-						{
-							this.destinationCourante = this.etapeDApres; // Si aucun parcours n'a été défini, on suppose que la voiture aura obtenu une direction en "discutant" avec le Croisement vers lequel elle se dirigeait
-							this.etapeDApres = null;
+							this.destinationCourante = null;
+					}
+					else
+					{
+if (this.etapeDApres == null) System.out.println("\nERREUR : (Voiture " + this.getUserId() + ") sur un Croisement, pas de parcours défini et etapeDapres = null. destinationCourante vaut maintenant null\n");//FIXME
+						this.destinationCourante = this.etapeDApres; // Si aucun parcours n'a été défini, on suppose que la voiture aura obtenu une direction en "discutant" avec le Croisement vers lequel elle se dirigeait
+						this.etapeDApres = null;
+					}
+				}
+			}
+		}
+		System.out.println("\n=====Voiture " + this.getUserId() + " arrivée ("+this.dernierCroisementParcouru.getUserId()+") à destination("+this.destinationFinale.getUserId()+")=====");
+	}
+	
+
+	/**
+	 * Méthode redéfinie et appelée automatiquement lorsque la voiture reçoit une frame.
+	 * Devrait logiquement plutôt s'appeler onReceivedFrame
+	 */
+	public synchronized void receivedFrame(Frame frame){
+		//Si la frame m'est bien destinée
+		if((frame.getReceiver()==Frame.BROADCAST || frame.getReceiver()==this.getUserId()) && this.destinationCourante != null/* On ne traite pas les messages si on est arrivé à destination */)
+		{				
+			//... alors extraction des données dans un objet message
+			AgentsVANETMessage msg = (AgentsVANETMessage) frame.getMessage();
+			
+			if(msg.getTypeMessage()==AgentsVANETMessage.DIRE_QUI_PEUT_PASSER)
+			{//Si le message correspond à un message envoyé par un feu de signalisation
+				if(this.destinationCourante.getUserId() == frame.getSender())
+				{// Je n'écoute que le feu vers lequel je me dirige. S'il est à portée sur une rue pas loin ou derrière moi, nafout'						
+					if (msg.getVoieLibre() == this.dernierCroisementParcouru.getUserId())// Si je suis sur la voie au vert
+						// Récupérer la référence vers le Croisement qui a envoyé le message et appeler gererCirculation pour mon cas
+						idToCroisement(msg.getSender()).gererCirculation(this);	
+					else // je ne suis pas sur la voie qui est au vert
+						this.peutBouger = false; // Interdire le déplacement
+				}				
+			}
+			else if (msg.getTypeMessage()==AgentsVANETMessage.DIFFUSION_TRAJET){ //Si le message est un message permettant de tisser un trajet
+				if (this.concerneeParLeChainage(msg)){ //Si je suis en position pour rajouter légitimement un croisement dans le parcours du message ou m'en servir
+					List<Croisement> listeCroisement = idListToCroisementList(msg.parcoursMessage);
+					Iterator<Croisement> iteratorParcours = listeCroisement.iterator(); 			
+					Croisement temp;
+					int nbCroisements = 0;
+					
+					//Si la destination est comprise dans le message alors on peut modifier l'attribut trajet de la voiture ssi le parcours est plus rapide...
+					while (iteratorParcours.hasNext()){
+						temp = iteratorParcours.next();
+						nbCroisements++;
+						if (shorterWayToDestinationFinale(temp, nbCroisements)) 
+						{// si j'ai trouvé ma destination finale dans la liste et que le chemin à parcourir pour l'atteindre est plus court que ce que j'avais prévu, je considére ce nouveau trajet comme celui à emprunter
+							this.actualiserParcoursCourant(msg);//FIXME la condition est probablement mauvaise, car si le parcours est le même, ça actualise quand même
+							break;
 						}
 					}
-				}				
-			}			
+					
+					// Re-transmission du message
+					if (msg.getTTLMessage() > 0)
+					{
+						AgentsVANETMessage msgToForward = new AgentsVANETMessage(this.getUserId(), Frame.BROADCAST, AgentsVANETMessage.DIFFUSION_TRAJET);
+						msgToForward.initTrajetMessage(msg, this.dernierCroisementParcouru);
+						this.sendFrame(new AgentsVANETFrame(this.getUserId(), Frame.BROADCAST, msgToForward));// On envoie la frame directement, sans passer par this.sendMessage (auquel cas on se serait fait bien chier pour rien)
+					}
+				}		
+			}
+			else if (msg.getTypeMessage() == AgentsVANETMessage.INDIQUER_DIRECTION) { // message permettant de choisir la prochaine direction en fonction des "panneaux" du Croisement à venir 
+				if (this.destinationCourante.getUserId() == frame.getSender())// on n'écoute que le croisement vers lequel on se dirige
+					{
+						if (this.parcoursPrefere.isEmpty() && this.etapeDApres == null)// on peut ignorer le message si on a déjà un itinéraire complet ou si on connait déjà quelle sera la prochaine destination
+							idToCroisement(msg.getSender()).indiquerDirectionAPrendre(this);
+					}
+			}
+			//else if un autre genre de message intéressant
+			//et tous les autres types de message, on les ignore (pas de else)
 		}
 	}
 	
-	
-	public void setView( String sprite_filename){
-		try {this.view = new ImageFileBasedObjectView(sprite_filename);}
-		catch (Exception e){
-			System.out.println("Impossible de charger le fichier " + this.view.toString());
+	/**
+	 * Remplace this.parcoursPrefere par un autre itinéraire plus intéressant
+	 * @param msgParcours le message contenant le nouveau parcours. Il est nécessaire d'avoir vérifié au préalable qu'il contient effectivement un meilleur parcours
+	 * (entre autres, qu'il conduit bien jusqu'à la destination voulue...)
+	 */
+	private void actualiserParcoursCourant(AgentsVANETMessage msgParcours){
+
+		List<Croisement> nouvParcours = new LinkedList<Croisement>();
+		Iterator<Integer> iteratorParcours = msgParcours.parcoursMessage.iterator();
+		Croisement croisCour = idToCroisement(iteratorParcours.next());
+		while (! croisCour.equals(this.destinationFinale)){
+			// je recopie le trajet à emprunter jusqu'à ma destination finale
+			nouvParcours.add(croisCour);
+			croisCour = idToCroisement(iteratorParcours.next());
 		}
+		nouvParcours.add(croisCour);// et on rajoute destinationFinale, qui sera notre dernière étape
+		
+	
+	//on vérifie que le parcours en question est différent de l'actuel.
+//if (! nouvParcours.equals(this.parcoursPrefere))//FIXME cette condition est utilisée pour une plus grande clarté lors du débug. Il est probablement plus rapide de remplacer la liste par une copie conforme sans se poser de questions plutôt que de vérifier pour chacun des éléments s'ils sont différents		
+		remplacerParcoursPrefere(nouvParcours);
+	}
+		
+	
+	/**
+	 * Méthode appelée par le Croisement qui indique à la voiture où aller, quand il voit que destinationFinale est adjacente à lui-même.
+	 * Remplace parcoursPrefere par le parcours désormais définitif : <le croisement appelant(destinationCourante), destinationFinale (qui se trouve à coté)> 
+	 */
+	public void indiquerDestinationFinaleAdjacente () {
+		List<Croisement> nouvParcours = new LinkedList<Croisement>();
+		nouvParcours.add(this.destinationCourante);
+		nouvParcours.add(this.destinationFinale);
+		remplacerParcoursPrefere(nouvParcours);
+	}
+	
+	/**
+	 * Remplace parcoursPrefere par la liste donnée en paramètre.
+	 * DOIT ETRE appelée par les méthodes qui veulent changer parcoursPrefere, car remplacerParcoursPrefere met également à jour l'itérateur.
+	 * @param nouveauParcours la liste des Croisement à emprunter jusqu'à destinationFinale. Aucune vérification n'est faite.
+	 */
+	private void remplacerParcoursPrefere(List<Croisement> nouveauParcours) {
+System.out.println("");System.out.println("/!\\Ici Voiture " + this.getUserId() + " : J'ai trouvé un (meilleur) itinéraire ("+nouveauParcours.size()+" ("+nouveauParcours+")au lieu de "+this.parcoursPrefere.size()+"("+this.parcoursPrefere+"))");//FIXME
+		this.parcoursPrefere = nouveauParcours;
+		this.iteratorDestinations = this.parcoursPrefere.iterator();
 	}
 	
 	/**
@@ -191,97 +327,46 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 			
 			this.setPosition(this.getPosition().x + deltaX, this.getPosition().y + deltaY);
 			// Rafraichissement du Sprite de la voiture en fonction de l'orientation de celle-ci
-		/*	switch (deltaX){
+			switch (deltaX){
 				case 1: 
 					switch (deltaY){
 						case 1 :
-							this.setView(SPRITE_FILENAME_UP_RIGHT);				
+							this.setView(SPRITE_FILENAME_DOWN_RIGHT);		
+							break;
 						case 0 :
 							this.setView(SPRITE_FILENAME_RIGHT);
+							break;
 						case -1 :
-							this.setView(SPRITE_FILENAME_DOWN_RIGHT);				
+							this.setView(SPRITE_FILENAME_UP_RIGHT);
+							break;
 					}
+				break;
 				case 0: 
 					switch (deltaY){
 					case 1 :
-						this.setView(SPRITE_FILENAME_UP);
+						this.setView(SPRITE_FILENAME_DOWN);
+						break;
 					case -1 :
-						this.setView(SPRITE_FILENAME_DOWN);			
-					}				
+						this.setView(SPRITE_FILENAME_UP);		
+						break;
+					}
+				break;
 				case -1: 
 					switch (deltaY){
 						case 1 :
-							this.setView(SPRITE_FILENAME_UP_LEFT);				
+							this.setView(SPRITE_FILENAME_DOWN_LEFT);		
+							break;
 						case 0 :
-							this.setView(SPRITE_FILENAME_LEFT);					
+							this.setView(SPRITE_FILENAME_LEFT);			
+							break;
 						case -1 :
-							this.setView(SPRITE_FILENAME_DOWN_LEFT);			
+							this.setView(SPRITE_FILENAME_UP_LEFT);	
+							break;
 					}
-			}*/	
+				break;
+			}
 		}
 	}
-
-	/**
-	 * Méthode redéfinie et appelée automatiquement lorsque la voiture reçoit une frame.
-	 * Devrait logiquement plutôt s'appeler onReceivedFrame
-	 */
-	public synchronized void receivedFrame(Frame frame){
-		//Si la frame m'est bien destinée
-		if((frame.getReceiver()==Frame.BROADCAST || frame.getReceiver()==this.getUserId()) && this.destinationCourante != null/* On ne traite pas les messages si on est arrivé à destination */)
-		{				
-			//... alors extraction des données dans un objet message
-			AgentsVANETMessage msg = (AgentsVANETMessage) frame.getMessage();
-			
-			if(msg.getTypeMessage()==AgentsVANETMessage.DIRE_QUI_PEUT_PASSER)
-			{//Si le message correspond à un message envoyé par un feu de signalisation
-				if(this.destinationCourante.getUserId() == frame.getSender())
-				{// Je n'écoute que le feu vers lequel je me dirige. S'il est à portée sur une rue pas loin ou derrière moi, nafout'						
-					if (msg.getVoieLibre() != this.dernierCroisementParcouru.getUserId())// Si je ne suis pas sur la voie qui est au vert
-						this.peutBouger = false; // Interdire le déplacement
-					else  // je suis sur la voie au vert
-						// Récupérer la référence vers le Croisement qui a envoyé le message et appeler gererCirculation pour mon cas
-						idToCroisement(msg.getSender()).gererCirculation(this);				
-				}				
-			}
-			else if (msg.getTypeMessage()==AgentsVANETMessage.DIFFUSION_TRAJET){ //Si le message est un message permettant de tisser un trajet
-				if (this.concerneeParLeChainage(msg)){ //Si je suis en position pour rajouter légitimement un croisement dans le parcours du message ou m'en servir
-					List<Croisement> listeCroisement = idListToCroisementList(msg.parcoursMessage);
-					Iterator<Croisement> iteratorParcours = listeCroisement.iterator(); 			
-					Croisement temp = iteratorParcours.next();
-					int nbCroisements = 0;
-					
-					//Si la destination est comprise dans le message alors on peut modifier l'attribut trajet de la voiture ssi le parcours est plus rapide...
-					while (iteratorParcours.hasNext()){ //FIXME doute : si on n'a qu'un seul croisement dans le message (=message n'ayant jamais été retransmis), on rentre pas dans ce while, probleme ?
-						temp = iteratorParcours.next();
-						nbCroisements++;
-						if (shorterWayToDestinationFinale(temp, nbCroisements)) 
-						{// si j'ai trouvé ma destination finale dans la liste et que le chemin à parcourir pour l'atteindre est plus court que ce que j'avais prévu, je considére ce nouveau trajet comme celui à emprunter
-							this.actualiserParcoursCourant(msg);
-							break;
-						}
-					}
-					
-					// Re-transmission du message
-					if (msg.getTTLMessage() > 0)
-					{
-						AgentsVANETMessage msgToForward = new AgentsVANETMessage(this.getUserId(), Frame.BROADCAST, AgentsVANETMessage.DIFFUSION_TRAJET);
-						msgToForward.initTrajetMessage(msg, this.dernierCroisementParcouru);
-						this.sendFrame(new AgentsVANETFrame(this.getUserId(), Frame.BROADCAST, msgToForward));// On envoie la frame directement, sans passer par this.sendMessage (auquel cas on se serait fait bien chier pour rien)
-					}
-				}		
-			}
-			else if (msg.getTypeMessage() == AgentsVANETMessage.INDIQUER_DIRECTION) { // message permettant de choisir la prochaine direction en fonction des "panneaux" du Croisement à venir 
-				if (this.destinationCourante.getUserId() == frame.getSender())// on n'écoute que le croisement vers lequel on se dirige
-					{
-						if (this.parcoursPrefere.isEmpty() && this.etapeDApres == null)// on peut ignorer le message si on a déjà un itinéraire complet ou si on connait déjà quelle sera la prochaine destination
-							idToCroisement(msg.getSender()).indiquerDirectionAPrendre(this);
-					}
-			}
-			//else if un autre genre de message intéressant
-			//et tous les autres types de message, on les ignore (pas de else)
-			}
-		}
-	
 	
 	@Override
 	public void sendMessage(int receiver, String message) {	
@@ -302,67 +387,23 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 		this.setDestinationFinale(idDestinationFinale);
 	}
 	
-	
-	/**
-	 * Renvoie la liste de Croisement correspondant aux id de la liste d'entiers donnée
-	 * @param intList la liste des id
-	 * @return la liste de Croisement
-	 */
-	private List<Croisement>idListToCroisementList(List<Integer> intList) {
-		Iterator<Integer> iteratorInt = intList.iterator();
-		List<Croisement> res = new LinkedList<Croisement>();
-		while (iteratorInt.hasNext())
-			res.add(idToCroisement(iteratorInt.next()));
-		return res;
-	}
-	
-	/**
-	 * Renvoie le Croisement possédant l'id donné
-	 * @param id
-	 * @return le Croisement (marcherait probablement aussi pour les autres agents)
-	 */
-	private Croisement idToCroisement(int id) {
-		return (Croisement) this.getMAS().getSimulatedObject(new ObjectSystemIdentifier(id)).getObject();
-	}
-	/**
-	 * Remplace this.parcoursPrefere par un autre itinéraire plus intéressant
-	 * @param msgParcours le message contenant le nouveau parcours. Il est nécessaire d'avoir vérifié au préalable qu'il contient effectivement un meilleur parcours
-	 * (entre autres, qu'il conduit bien jusqu'à la destination voulue...)
-	 */
-	private void actualiserParcoursCourant(AgentsVANETMessage msgParcours){
-
-		List<Croisement> nouvParcours = new LinkedList<Croisement>();
-		Iterator<Integer> iteratorParcours = msgParcours.parcoursMessage.iterator();
-		Croisement croisCour = idToCroisement(iteratorParcours.next());
-		while (! croisCour.equals(this.destinationFinale)){
-			// je recopie le trajet à emprunter jusqu'à ma destination finale
-			nouvParcours.add(croisCour);
-			croisCour = idToCroisement(iteratorParcours.next());
-		}
-System.out.println("");System.out.println("/!\\Ici Voiture " + this.getUserId() + " : J'ai trouvé un (meilleur) itinéraire ("+nouvParcours.size()+" au lieu de "+this.getNbEtapesParcoursCourant()+")");//FIXME
-		remplacerParcoursPrefere(nouvParcours);
-	}
-	
-	/**
-	 * Comme l'homonyme, mais avec un seul Croisement. Utile pour, par exemple, un Croisement qui veut indiquer que le chemin pour destinationFinale est
-	 * à un saut, et qui donc en fait un chemin "officiel".
-	 * Remplace this.parcoursPrefere par un autre itinéraire constitué d'un seul Croisement. On suppose donc qu'il mène directement à destinationFinale
-	 * @param c
-	 */
-	public void actualiserParcoursCourant(Croisement c) {
-		List<Croisement> listUnItem = new LinkedList<Croisement>();
-		listUnItem.add(c);
-		remplacerParcoursPrefere(listUnItem);
-	}
-	
-	/**
-	 * Remplace parcoursPrefere par la liste donnée en paramètre.
-	 * DOIT ETRE appelée par les méthodes qui veulent changer parcoursPrefere, car remplacerParcoursPrefere met également à jour l'itérateur.
-	 * @param nouveauParcours la liste des Croisement à emprunter jusqu'à destinationFinale. Aucune vérification n'est faite.
-	 */
-	private void remplacerParcoursPrefere(List<Croisement> nouveauParcours) {
-		this.parcoursPrefere = nouveauParcours;
-		this.iteratorDestinations = this.parcoursPrefere.iterator();
+	public void setView(String sprite_filename){
+		if (sprite_filename.equals(SPRITE_FILENAME_UP))
+			this.view = this.viewUp;
+		else if (sprite_filename.equals(SPRITE_FILENAME_UP_RIGHT))
+			this.view = this.viewUpRight;
+		else if (sprite_filename.equals(SPRITE_FILENAME_RIGHT))
+			this.view = this.viewRight;
+		else if (sprite_filename.equals(SPRITE_FILENAME_DOWN_RIGHT))
+			this.view = this.viewDownRight;
+		else if (sprite_filename.equals(SPRITE_FILENAME_DOWN))
+			this.view = this.viewDown;
+		else if (sprite_filename.equals(SPRITE_FILENAME_DOWN_LEFT))
+			this.view = this.viewDownLeft;
+		else if (sprite_filename.equals(SPRITE_FILENAME_LEFT))
+			this.view = this.viewLeft;
+		else if (sprite_filename.equals(SPRITE_FILENAME_UP_LEFT))
+			this.view = this.viewUpLeft;
 	}
 	
 	/**
@@ -373,10 +414,9 @@ System.out.println("");System.out.println("/!\\Ici Voiture " + this.getUserId() 
 	 * @return
 	 */
 	private boolean shorterWayToDestinationFinale(Croisement finDuParcours, int nbCroisementsNouvParcours) {
-		return finDuParcours.equals(this.destinationFinale) && (nbCroisementsNouvParcours < this.getNbEtapesParcoursCourant() || this.getNbEtapesParcoursCourant() == 0);
+		return finDuParcours.equals(this.destinationFinale) && (nbCroisementsNouvParcours < this.parcoursPrefere.size() || this.parcoursPrefere.isEmpty());
 	}
 	
-	//TODO Pour ceux qui s'ennuient : classer l'ordre des méthodes (ex : constructeurs/public/private/getters/setters), et sous-classer par type de return
 
 	/**
 	 * Évite, entre autres, qu'une voiture géographiquement proche mais qui n'a aucun rapport en ce qui concerne les rues, traite le DIFFUSION_TRAJET reçu.
@@ -397,6 +437,19 @@ System.out.println("");System.out.println("/!\\Ici Voiture " + this.getUserId() 
 			System.out.println("ERREUR : on a reçu un message de diffusion de trajet vide (aucune étape). typeMessage=" + msg.getTypeMessage()+" (cf constantes)");
 		return res;
 	}
+	
+	
+	/**
+	 * Fonction calculant la distance entre deux agents en récupérant les coordonnées de l'agent passé en paramètre
+	 * @param agent l'agent cible
+	 * @return la distance agent(this) <-> agent cible
+	 */
+	public int getDistanceAutreAgent(Agent agent) {
+		int deltaX= Math.abs(agent.getPosition().x-this.getPosition().x);
+		int deltaY= Math.abs(agent.getPosition().y-this.getPosition().y);		
+	
+		return (int) Math.sqrt(deltaX*deltaX+deltaY*deltaY);
+	}	
 	
 	
 	/**
@@ -446,25 +499,7 @@ System.out.println("");System.out.println("/!\\Ici Voiture " + this.getUserId() 
 	public Croisement getDernierCroisementParcouru() {
 		return this.dernierCroisementParcouru;
 	}
-	/**
-	 * Fonction calculant la distance entre deux agents en récupérant les coordonnées de l'agent passé en paramètre
-	 * @param agent l'agent cible
-	 * @return la distance agent(this) <-> agent cible
-	 */
-	public int getDistanceAutreAgent(Agent agent) {
-		int deltaX= Math.abs(agent.getPosition().x-this.getPosition().x);
-		int deltaY= Math.abs(agent.getPosition().y-this.getPosition().y);		
-	
-		return (int) Math.sqrt(deltaX*deltaX+deltaY*deltaY);
-	}
-	
-	/**
-	 * Renvoie le nombre d'éléments de la liste this.parcoursPrefere. Utile pour les idiots comme moi qui n'avaient pas remarqué l'existence de .size()
-	 * @return le nombre de mouvements à faire, car le 1er n'est pas compté
-	 */
-	private int getNbEtapesParcoursCourant() {//FIXME synchronized ? ou ça risquerait au contraire de bloquer une méthode synchronized qui appellerait celle-ci ? et puis zut, faites pas *****, utilisez .size()
-		return this.parcoursPrefere.size();
-	}
+
 	/**
 	 * Accesseur en lecture de la vue (sprite, caractère ascii, etc..) celle-ci s'affiche dans l'environnement MASH.
 	 */
@@ -472,5 +507,25 @@ System.out.println("");System.out.println("/!\\Ici Voiture " + this.getUserId() 
 		return this.view;
 	}
 	
-
+	/**
+	 * Renvoie le Croisement possédant l'id donné
+	 * @param id
+	 * @return le Croisement (marcherait probablement aussi pour les autres agents)
+	 */
+	private Croisement idToCroisement(int id) {
+		return (Croisement) this.getMAS().getSimulatedObject(new ObjectSystemIdentifier(id)).getObject();
+	}
+	
+	/**
+	 * Renvoie la liste de Croisement correspondant aux id de la liste d'entiers donnée
+	 * @param intList la liste des id
+	 * @return la liste de Croisement
+	 */
+	private List<Croisement>idListToCroisementList(List<Integer> intList) {
+		Iterator<Integer> iteratorInt = intList.iterator();
+		List<Croisement> res = new LinkedList<Croisement>();
+		while (iteratorInt.hasNext())
+			res.add(idToCroisement(iteratorInt.next()));
+		return res;
+	}
 }

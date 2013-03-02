@@ -18,11 +18,6 @@ import simulation.messages.Message;
 @SuppressWarnings("serial")
 public class AgentsVANETFrame extends Frame 
 {
-	//TODO: Verifier la structure de donnée suivante : 
-	//	- Une frame contient les ID brutes de l'envoyeur 
-	//	- Dans un message on stock la cible-type du message (ex: voiture)
-	
-	
 	/** 
 	 * Constructeur d'une frame
 	 * @param sender ID de l'expediteur

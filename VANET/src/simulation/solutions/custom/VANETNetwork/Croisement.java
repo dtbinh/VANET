@@ -142,7 +142,7 @@ public class Croisement extends Agent implements ObjectAbleToSendMessageInterfac
 	public void indiquerDirectionAPrendre(Voiture voiture) {
 		if (this.feu.contient(voiture.getDestinationFinale()))
 			// on remplace l'ancien éventuel parcours par "vazy c'est juste là"
-			voiture.actualiserParcoursCourant(voiture.getDestinationFinale());
+			voiture.indiquerDestinationFinaleAdjacente();
 		else
 			voiture.setEtapeDApres(this.directionAleatoireAutreQue(voiture.getDernierCroisementParcouru()));
 	}
@@ -173,7 +173,7 @@ public class Croisement extends Agent implements ObjectAbleToSendMessageInterfac
 		return this.feu.contient(c);
 	}
 	
-	public boolean equals(Croisement c){ //TODO réfléchir : est-ce suffisant ?
+	public boolean equals(Croisement c){
 		return this.getUserId() == c.getUserId();
 	}
 	
