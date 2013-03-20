@@ -12,6 +12,7 @@ import simulation.views.entity.imageInputBased.ImageFileBasedObjectView;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 //TODO en règle générale, vérifier que, lorsqu'on change quelque chose, le commentaire lié ne devrait pas lui aussi subir une modification. La doc et même les simples commentaires doivent rester à jour.
 //TODO Si ça marche pas, checker les FIXME_TODO, il y a peut-être une explication au bug à laquelle on avait déjà pensé...
@@ -28,24 +29,23 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	/**
 	 * Référencement des ressources, via le chemin relatif
 	 */
-	private final static String SPRITE_FILENAME_UP ="VANET.Ressources\\Sprites\\miniCar.bmp";
-    private final static String SPRITE_FILENAME_UP_RIGHT ="VANET.Ressources\\Sprites\\miniCar.bmp";
-	private final static String SPRITE_FILENAME_RIGHT ="VANET.Ressources\\Sprites\\miniCar.bmp";
-	private final static String SPRITE_FILENAME_DOWN_RIGHT ="VANET.Ressources\\Sprites\\miniCar.bmp";
-	private final static String SPRITE_FILENAME_DOWN ="VANET.Ressources\\Sprites\\miniCar.bmp";
-	private final static String SPRITE_FILENAME_DOWN_LEFT ="VANET.Ressources\\Sprites\\miniCar.bmp";
-	private final static String SPRITE_FILENAME_LEFT ="VANET.Ressources\\Sprites\\miniCar.bmp";	
-	private final static String SPRITE_FILENAME_UP_LEFT ="VANET.Ressources\\Sprites\\miniCar.bmp";
-	/*
-	 * 	private final static String SPRITE_FILENAME_UP ="VANET.Ressources\\Sprites\\carViewUp.bmp";
-    private final static String SPRITE_FILENAME_UP_RIGHT ="VANET.Ressources\\Sprites\\carViewUpRight.bmp";
-	private final static String SPRITE_FILENAME_RIGHT ="VANET.Ressources\\Sprites\\carViewRight.bmp";
-	private final static String SPRITE_FILENAME_DOWN_RIGHT ="VANET.Ressources\\Sprites\\carViewDownRight.bmp";
-	private final static String SPRITE_FILENAME_DOWN ="VANET.Ressources\\Sprites\\carViewDown.bmp";
-	private final static String SPRITE_FILENAME_DOWN_LEFT ="VANET.Ressources\\Sprites\\carViewDownLeft.bmp";
-	private final static String SPRITE_FILENAME_LEFT ="VANET.Ressources\\Sprites\\carViewLeft.bmp";	
-	private final static String SPRITE_FILENAME_UP_LEFT ="VANET.Ressources\\Sprites\\carViewUpLeft.bmp";
+
+	/**
+	 * Le "nom de la voiture" qui apparaitra à l'écran. Il s'agit du sous-dossier possédant les sprites désirés.
+	 * C'est la String à modifier quand on veut que ce soit un autre type de voiture affiché.
 	 */
+	private String SPRITE_VOITURE_UTILISE = "bumperCar";
+
+	// Les sprites portent le même nom (up.bmp, upLeft.bmp, ...), et se différencient selon le dossier dans lequel ils sont situés, chacun représentant un sprite de Voiture
+	private String SPRITE_FILENAME_UP;
+	private String SPRITE_FILENAME_UP_RIGHT;
+	private String SPRITE_FILENAME_RIGHT;
+	private String SPRITE_FILENAME_DOWN_RIGHT;
+	private String SPRITE_FILENAME_DOWN;
+	private String SPRITE_FILENAME_DOWN_LEFT;
+	private String SPRITE_FILENAME_LEFT;
+	private String SPRITE_FILENAME_UP_LEFT;
+	
 	
 	/*
 	 * On actualisera view avec les suivantes en fonction des déplacements de la Voiture
@@ -59,7 +59,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	private ImageFileBasedObjectView viewLeft;
 	private ImageFileBasedObjectView viewUpLeft;
 
-	private final String DIFFUSION_TRAJET = "DIFFUSION_TRAJET";
+	private static final String DIFFUSION_TRAJET = "DIFFUSION_TRAJET";
 	/**
 	 * Attribut permettant l'affichage d'une vue personnalisée via un sprite. Il s'agit de l'image actuellement affichée
 	 */
@@ -68,7 +68,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	/**
 	 * En gros, la vitesse du véhicule. /!\ Une valeur élevée indique un véhicule lent
 	 */
-	private int TAUX_RAFRAICHISSEMENT =80; 
+	private int TAUX_RAFRAICHISSEMENT =500; 
 	
 	/**
 	 * Booléen indiquant si la voiture a le droit de se déplacer. (Par exemple, permet d'attendre à un feu rouge)
@@ -107,6 +107,10 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	 */
 	private Iterator<Croisement> iteratorDestinations;
 	
+	/**
+	 * Croisement vers lequel on se dirige. Contient toujours un Croisement précis, car destinationCourante à null signifie
+	 * que la voiture n'a plus nulle part où aller, c'est-à-dire qu'elle est arrivée à destination, et qu'elle sera donc "détruite"
+	 */
 	private Croisement destinationCourante;
 	/**
 	 * Constructeur par défaut appelé lors de la création de la voiture (la création est gérée par MASH)
@@ -128,22 +132,10 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 		this.etapeDApres = null;
 		this.setRange(this.getRange() * 4);
 		
-		try {
-			this.viewUp = new ImageFileBasedObjectView(SPRITE_FILENAME_UP);
-			this.viewUpRight = new ImageFileBasedObjectView(SPRITE_FILENAME_UP_RIGHT);
-			this.viewRight = new ImageFileBasedObjectView(SPRITE_FILENAME_RIGHT);
-			this.viewDownRight = new ImageFileBasedObjectView(SPRITE_FILENAME_DOWN_RIGHT);
-			this.viewDown = new ImageFileBasedObjectView(SPRITE_FILENAME_DOWN);
-			this.viewDownLeft = new ImageFileBasedObjectView(SPRITE_FILENAME_DOWN_LEFT);
-			this.viewLeft = new ImageFileBasedObjectView(SPRITE_FILENAME_LEFT);
-			this.viewUpLeft = new ImageFileBasedObjectView(SPRITE_FILENAME_UP_LEFT);
-			this.view = this.viewUp;
-		}
-		catch (Exception e){
-			System.out.println("\nImpossible de charger un des sprites");
-		}
+		this.initialiserSprites();
 	}	
  
+	
 	/**
 	 * Fonction principale de "maintien" d'activité de la voiture, permet d'appeler des fonctions, attention seulement à ne pas les rendre bloquantes.
 	 * run est appelée automatiquement par MASH lors du lancement de la simulation
@@ -163,7 +155,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 				e.printStackTrace();
 			}
 
-			this.sendMessage(Frame.BROADCAST, DIFFUSION_TRAJET); //FIXME Est-ce que du coup, on envoie pas ces messages un peu trop souvent (à chaque rafraichissement du sprite) ? Risque de lag inutile ?
+			this.sendMessage(Frame.BROADCAST, DIFFUSION_TRAJET); //FIXME Est-ce que du coup, on envoie pas ces messages un peu trop souvent (à chaque rafraichissement du sprite) ? Risque de lag inutile ? OUI, à changer
 			
 			if (this.peutBouger)
 			{
@@ -172,8 +164,8 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 				if (this.destinationCourante.getPosition().equal(this.getPosition()))
 				{// Si on est arrivé à la destination courante
 					this.dernierCroisementParcouru = this.destinationCourante;
-					this.destinationCourante.quitterCroisement(this.getUserId());// On considère ne plus être sur le croisement, les autres peuvent passer		
-					
+					this.destinationCourante.quitterCroisement(this.getUserId());// On considère ne plus être sur le croisement, les autres peuvent passer FIXME on demande à quitter même si on n'était pas la voiture prioritaire, d'où : plantage. Comment y remédier ? Attention, peut impliquer un gros changement de structure, ne pas prendre à la légère	
+					 
 					if (this.parcoursPrefere.size() > 0)
 					{
 						this.parcoursPrefere.remove(0);//On supprime de la liste le croisement qu'on vient de dépasser (le 1er de la liste)
@@ -193,6 +185,7 @@ if (this.etapeDApres == null) System.out.println("\nERREUR : (Voiture " + this.g
 				}
 			}
 		}
+		//FIXME faire un view = null; ici risquerait de faire planter ?
 		System.out.println("\n=====Voiture " + this.getUserId() + " arrivée ("+this.dernierCroisementParcouru.getUserId()+") à destination("+this.destinationFinale.getUserId()+")=====");
 	}
 	
@@ -284,7 +277,7 @@ if (this.etapeDApres == null) System.out.println("\nERREUR : (Voiture " + this.g
 	
 	/**
 	 * Méthode appelée par le Croisement qui indique à la voiture où aller, quand il voit que destinationFinale est adjacente à lui-même.
-	 * Remplace parcoursPrefere par le parcours désormais définitif : <le croisement appelant(destinationCourante), destinationFinale (qui se trouve à coté)> 
+	 * Remplace parcoursPrefere par le parcours désormais définitif : [le croisement appelant(destinationCourante), destinationFinale (qui se trouve à coté)]
 	 */
 	public void indiquerDestinationFinaleAdjacente () {
 		List<Croisement> nouvParcours = new LinkedList<Croisement>();
@@ -506,6 +499,43 @@ System.out.println("");System.out.println("/!\\Ici Voiture " + this.getUserId() 
 	public ImageFileBasedObjectView getView() {
 		return this.view;
 	}
+	
+	/**
+	 * Méthode appelée par le constructeur afin de choisir aléatoirement un sprite pour la voiture, et d'initialiser les attributs nécessaires.
+	 */
+	private void initialiserSprites() {
+		Random r = new Random();
+		int rd = r.nextInt(2);//Le paramètre représente le nombre de choix que l'on a pour les sprites.
+		if (rd == 1)
+			this.SPRITE_VOITURE_UTILISE = "bumperCarRouge";
+		//else if (rd == X)...
+		else
+			this.SPRITE_VOITURE_UTILISE = "bumperCarVerte";
+		
+		SPRITE_FILENAME_UP ="VANET.Ressources\\Sprites\\" + SPRITE_VOITURE_UTILISE + "\\up.bmp";
+		SPRITE_FILENAME_UP_RIGHT ="VANET.Ressources\\Sprites\\" + SPRITE_VOITURE_UTILISE + "\\upRight.bmp";
+		SPRITE_FILENAME_RIGHT ="VANET.Ressources\\Sprites\\" + SPRITE_VOITURE_UTILISE + "\\right.bmp";
+		SPRITE_FILENAME_DOWN_RIGHT ="VANET.Ressources\\Sprites\\" + SPRITE_VOITURE_UTILISE + "\\downRight.bmp";
+		SPRITE_FILENAME_DOWN ="VANET.Ressources\\Sprites\\" + SPRITE_VOITURE_UTILISE + "\\down.bmp";
+		SPRITE_FILENAME_DOWN_LEFT ="VANET.Ressources\\Sprites\\" + SPRITE_VOITURE_UTILISE + "\\downLeft.bmp";
+		SPRITE_FILENAME_LEFT ="VANET.Ressources\\Sprites\\" + SPRITE_VOITURE_UTILISE + "\\left.bmp";
+		SPRITE_FILENAME_UP_LEFT ="VANET.Ressources\\Sprites\\" + SPRITE_VOITURE_UTILISE + "\\upLeft.bmp";
+		try {
+			this.viewUp = new ImageFileBasedObjectView(SPRITE_FILENAME_UP);
+			this.viewUpRight = new ImageFileBasedObjectView(SPRITE_FILENAME_UP_RIGHT);
+			this.viewRight = new ImageFileBasedObjectView(SPRITE_FILENAME_RIGHT);
+			this.viewDownRight = new ImageFileBasedObjectView(SPRITE_FILENAME_DOWN_RIGHT);
+			this.viewDown = new ImageFileBasedObjectView(SPRITE_FILENAME_DOWN);
+			this.viewDownLeft = new ImageFileBasedObjectView(SPRITE_FILENAME_DOWN_LEFT);
+			this.viewLeft = new ImageFileBasedObjectView(SPRITE_FILENAME_LEFT);
+			this.viewUpLeft = new ImageFileBasedObjectView(SPRITE_FILENAME_UP_LEFT);
+			this.view = this.viewUp;
+		}
+		catch (Exception e){
+			System.out.println("\nImpossible de charger un des sprites");
+		}
+	}
+	
 	
 	/**
 	 * Renvoie le Croisement possédant l'id donné

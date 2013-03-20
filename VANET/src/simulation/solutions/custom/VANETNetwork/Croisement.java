@@ -140,7 +140,7 @@ public class Croisement extends Agent implements ObjectAbleToSendMessageInterfac
 	 * @param voiture la Voiture qui a besoin d'indications
 	 */
 	public void indiquerDirectionAPrendre(Voiture voiture) {
-		if (this.feu.contient(voiture.getDestinationFinale()))
+		if (this.estAdjacentA(voiture.getDestinationFinale()))
 			// on remplace l'ancien éventuel parcours par "vazy c'est juste là"
 			voiture.indiquerDestinationFinaleAdjacente();
 		else

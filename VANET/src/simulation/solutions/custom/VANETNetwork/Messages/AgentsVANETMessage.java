@@ -126,7 +126,7 @@ public class AgentsVANETMessage extends Message{
 		else if (this.typeMessage==INDIQUER_DIRECTION) 
 			return ByteBuffer.allocate(50).put(this.typeMessage).putInt(this.senderID).putInt(receiverID).array();
 		
-		//else if == ...
+		//else if (this.typeMessage== ... ) 
 		else
 		{
 			System.out.println("PROBLEME : Un message ne possède pas un typeMessage cohérent");
@@ -170,6 +170,17 @@ public class AgentsVANETMessage extends Message{
 	
 	public int getVoieLibre(){
 		return this.voieLibre;
+	}
+	
+	public String toString() {
+		String res = "From: "+this.senderID+", To:"+this.receiverID;
+		if (this.typeMessage == DIFFUSION_TRAJET)
+			res+="DIFFUSION_TRAJET. TTL="+this.TTLMessage+"Parcours="+this.parcoursMessage.toString();
+		else if (this.typeMessage == INDIQUER_DIRECTION)
+			res+="INDIQUER_DIRECTION";
+		else if (this.typeMessage == DIRE_QUI_PEUT_PASSER)
+			res+="DIRE_QUI_PEUT_PASSER. VoieLibre="+this.voieLibre;
+		return res;
 	}
 
 }

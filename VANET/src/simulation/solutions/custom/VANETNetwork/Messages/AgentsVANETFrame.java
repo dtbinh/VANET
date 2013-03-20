@@ -63,10 +63,16 @@ public class AgentsVANETFrame extends Frame
 			nouvMsg = new AgentsVANETMessage(buffer.getInt(), buffer.getInt(), type);
 		}
 		else
-			System.out.println("Error in the encapsulation of the frame data");
+			System.out.println("\nError in the encapsulation of the frame data\n");
 		
 		return nouvMsg;
 	}
+	
+	/*
+	 * FIXME Il semblerait qu'Old Performances Analysis ne fonctionne pas quand on redéfinit toString, pourquoi ?
+	 * public String toString() {
+		return "Frame from "+this.getSender()+" to "+this.getReceiver();
+	}*/
 }
 
 
