@@ -1,8 +1,9 @@
 package simulation.solutions.custom.VANETNetwork;
 /**
- * La classe croisement sert de support aux feux de signalisation et leurs référencements permet de tisser la map.
+ * La classe Croisement sert de support aux feux de signalisation et leurs référencements permet de tisser la map.
  * @Author Reykjanes 
  */
+
 
 import simulation.entities.Agent;
 import simulation.messages.Frame;
@@ -162,6 +163,29 @@ public class Croisement extends Agent implements ObjectAbleToSendMessageInterfac
 			this.voitureCourante = null;
 		else
 			System.out.println("\n"+"ERREUR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Ici Croisement n°" + this.getUserId() + ", la voiture n°" + idVoitureAuDepart + "prétend me quitter, mais la voiture prioritaire était " + this.voitureCourante.getUserId() + "!!!!");
+	}
+	
+	
+	
+	/**
+	 * équivalent de toString, sachant que le contenu est au format HTML. 
+	 * (La page HTML est affichée lorsque l'on clique sur l'agent)
+	 */
+	public String toSpyWindows() {
+		String res="<HTML><B>Croisement n" + this.getUserId() + " :</B><BR>";
+		
+		res += "Voie au vert : " + this.feu.getVoieLibre().getUserId() + "<BR>";
+		
+		res += "Voiture sur le croisement : ";
+		if (this.voitureCourante == null)
+			res += "AUCUNE<BR>";
+		else
+			res += this.voitureCourante.getUserId() + "<BR>";
+		
+		//TODO : rajouter la liste des croisements adjacents
+		
+		res += "</HTML>";
+		return res;
 	}
 	
 	/**

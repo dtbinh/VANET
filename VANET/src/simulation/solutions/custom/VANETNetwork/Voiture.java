@@ -501,6 +501,36 @@ System.out.println("");System.out.println("/!\\Ici Voiture " + this.getUserId() 
 	}
 	
 	/**
+	 * équivalent de toString, sachant que le contenu est au format HTML. 
+	 * (La page HTML est affichée lorsque l'on clique sur l'agent)
+	 */
+	public String toSpyWindows() {
+		String res="<HTML><B>Voiture n" + this.getUserId() + " :</B><BR>";
+		
+		res += "Destination Finale : " + this.destinationFinale.getUserId() + "<BR>";
+		if (this.destinationCourante == null)
+			res += "Arrivee à destination (" + this.destinationFinale.getUserId() + ")<BR>";
+		else
+			res += this.dernierCroisementParcouru.getUserId() + " => " + this.destinationCourante.getUserId() + "<BR>";
+		
+		res += "Parcours prefere courant :<BR>";
+		
+		res += "<UL>";
+		Iterator<Croisement> i = this.parcoursPrefere.iterator();
+		if (! i.hasNext())
+			res += "<LI>VIDE";
+		
+		while (i.hasNext()) {
+			res += "<LI>" + i.next().getUserId();
+		}
+		
+		res += "</UL>";
+		
+		res += "</HTML>";
+		return res;
+	}
+	
+	/**
 	 * Méthode appelée par le constructeur afin de choisir aléatoirement un sprite pour la voiture, et d'initialiser les attributs nécessaires.
 	 */
 	private void initialiserSprites() {
