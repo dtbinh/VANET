@@ -26,9 +26,6 @@ import java.util.Random;
 public class Voiture extends Agent implements ObjectAbleToSendMessageInterface 
 {	
 	//TODO se demander s'il n'y a pas des méthodes qui devraient être synchronized (afin qu'on ne puisse pas traiter un frame et faire certains autres trucs en même temps)
-	/**
-	 * Référencement des ressources, via le chemin relatif
-	 */
 
 	/**
 	 * Le "nom de la voiture" qui apparaitra à l'écran. Il s'agit du sous-dossier possédant les sprites désirés.
@@ -68,7 +65,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 	/**
 	 * En gros, la vitesse du véhicule. /!\ Une valeur élevée indique un véhicule lent
 	 */
-	private int TAUX_RAFRAICHISSEMENT =500; 
+	private int TAUX_RAFRAICHISSEMENT =100; 
 	
 	/**
 	 * Booléen indiquant si la voiture a le droit de se déplacer. (Par exemple, permet d'attendre à un feu rouge)
@@ -146,7 +143,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 		try{Thread.sleep(500);}catch(Exception e){e.printStackTrace();}		
 		
 		this.iteratorDestinations = this.parcoursPrefere.iterator();
-
+		int compteurEnvoiMessages = 0;
 		while(!isKilling() && !isStopping() && this.destinationCourante != null) // TODO && destinationCourante != null, est-ce bien à faire ? le sprite ne semble pas disparaitre. A discuter
 		{
 			try {
@@ -154,8 +151,12 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-
-			this.sendMessage(Frame.BROADCAST, DIFFUSION_TRAJET); //FIXME Est-ce que du coup, on envoie pas ces messages un peu trop souvent (à chaque rafraichissement du sprite) ? Risque de lag inutile ? OUI, à changer
+			
+			compteurEnvoiMessages++;
+			if (compteurEnvoiMessages == 10){// Pour ne pas envoyer le message à chaque itération
+				compteurEnvoiMessages = 0;
+				this.sendMessage(Frame.BROADCAST, DIFFUSION_TRAJET); //FIXME Est-ce que du coup, on envoie pas ces messages un peu trop souvent ? Risque de lag inutile ? OUI, à changer				
+			}
 			
 			if (this.peutBouger)
 			{
@@ -169,7 +170,7 @@ public class Voiture extends Agent implements ObjectAbleToSendMessageInterface
 					if (this.parcoursPrefere.size() > 0)
 					{
 						this.parcoursPrefere.remove(0);//On supprime de la liste le croisement qu'on vient de dépasser (le 1er de la liste)
-						this.iteratorDestinations = this.parcoursPrefere.iterator();
+						this.iteratorDestinations = this.parcoursPrefere.iterator();//et on remet à jour l'iterator.
 						
 						if (this.iteratorDestinations.hasNext())
 							this.destinationCourante = this.iteratorDestinations.next();
@@ -185,10 +186,10 @@ if (this.etapeDApres == null) System.out.println("\nERREUR : (Voiture " + this.g
 				}
 			}
 		}
-		//FIXME faire un view = null; ici risquerait de faire planter ?
+		//FIXME faire un view = null; ici risquerait de faire planter ? A tester, permettrait de faire disparaitre la voiture de l'écran si fonctionnel. Sinon, remplacer la vue courante par une image entièrement transparente.
 		System.out.println("\n=====Voiture " + this.getUserId() + " arrivée ("+this.dernierCroisementParcouru.getUserId()+") à destination("+this.destinationFinale.getUserId()+")=====");
 	}
-	
+
 
 	/**
 	 * Méthode redéfinie et appelée automatiquement lorsque la voiture reçoit une frame.
@@ -374,9 +375,9 @@ System.out.println("");System.out.println("/!\\Ici Voiture " + this.getUserId() 
 	/**
 	 * Appelée depuis les scénarios, cette méthode permettra d'initialiser la plupart des attributs de la Voiture.
 	 */
-	public void initVoiture(int idDernierCroisementParcouru, int prochaineDestination, int idDestinationFinale) {
+	public void initVoiture(int idDernierCroisementParcouru, int idProchaineDestination, int idDestinationFinale) {
 		this.setDernierCroisementParcouru(idDernierCroisementParcouru);
-		this.setDestinationCourante(prochaineDestination);
+		this.setDestinationCourante(idProchaineDestination);
 		this.setDestinationFinale(idDestinationFinale);
 	}
 	
@@ -404,7 +405,6 @@ System.out.println("");System.out.println("/!\\Ici Voiture " + this.getUserId() 
 	 * (ou que le parcours de base était vide, évidemment, on  peut considérer qu'un parcours vide possède [infini] croisements)
 	 * @param finDuParcours Le Croisement considéré comme le dernier du parcours actuellement testé
 	 * @param nbCroisementsNouvParcours le nombre de croisements nécessité pour arriver jusqu'à finDuParcours
-	 * @return
 	 */
 	private boolean shorterWayToDestinationFinale(Croisement finDuParcours, int nbCroisementsNouvParcours) {
 		return finDuParcours.equals(this.destinationFinale) && (nbCroisementsNouvParcours < this.parcoursPrefere.size() || this.parcoursPrefere.isEmpty());

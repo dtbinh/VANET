@@ -13,14 +13,11 @@ public class ChangerVoieAutorisee implements Runnable {
 	private FeuDeSignalisation feu;
 	
 	/**
-	 * J'espère pour toi que j'ai pas besoin de définir cet attribut... (MS = millisecondes)
+	 * J'espère pour toi que j'ai pas besoin de d'expliciter cet attribut... (MS = millisecondes)
 	 */
 	public static final int TEMPS_MS_ENTRE_2_CHANGEMENTS = 15000;
 	
-	/**
-	 * Accesseur en ecriture à l'attribut feu	
-	 * @param feu
-	 */
+
 	public ChangerVoieAutorisee(FeuDeSignalisation feu) {
 		this.feu = feu;
 	}
@@ -29,7 +26,6 @@ public class ChangerVoieAutorisee implements Runnable {
 	 * méthode redéfinie qui sera appelée automatiquement un fois qu'on aura fait leThread.start()
 	 * Contient l'algorithme principal du thread (changer le feu à intervalles réguliers)
 	 */
-	
 	@Override
 	public void run() {
 		while (true) //FIXME Quelle est la condition ici ?
